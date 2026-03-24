@@ -42,4 +42,4 @@ Thumbs.db
 **/migrations/*.py
 
 !**/migrations/__init__.py
-*.sqlite3
+*.sqlite3*.log
