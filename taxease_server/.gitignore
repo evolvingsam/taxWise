@@ -1,0 +1,12 @@
+.venv/
+venv/
+.venv
+venv
+
+
+
+*.env
+.env
+.env.local
+.env.production
+.env.test
