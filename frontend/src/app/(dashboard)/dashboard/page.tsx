@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { FileText, ArrowUpRight, Clock, PlusCircle, ShieldCheck, TrendingUp, Download, Sparkles, CheckCircle2 } from "lucide-react";
 import { mockLedger, mockUser } from "@/lib/mockData";
+import { ExportButton } from "@/components/dashboard/ExportButton";
 
 export default function DashboardPage() {
   const latestTax = mockLedger[0];
@@ -16,9 +17,7 @@ export default function DashboardPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="rounded-full shadow-sm hover:bg-gray-50 border-gray-200">
-            <Download className="w-4 h-4 mr-2" /> Export Ledger
-          </Button>
+          <ExportButton />
           <Link href="/intake">
             <Button className="rounded-full bg-brand-dark text-white hover:bg-brand-gold hover:text-brand-dark transition-all px-8 shadow-md">
               <PlusCircle className="w-4 h-4 mr-2" /> Log Income/Expense

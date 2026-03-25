@@ -26,7 +26,7 @@ export default function CompliancePage() {
   return (
     <div className="min-h-screen bg-[#FDFDFD] pt-24 pb-20">
       <div className="container mx-auto px-4 lg:px-8">
-        
+
         {/* Header Section */}
         <div className="max-w-4xl mx-auto text-center mb-24 space-y-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold text-brand-dark text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
@@ -44,7 +44,7 @@ export default function CompliancePage() {
         {/* The 3 Core Reforms Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {reforms.map((reform, i) => (
-            <div key={i} className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start hover:border-brand-gold hover:shadow-md transition-all group">
+            <div key={i} className="bg-white p-6 md:p-10 rounded-4xl md:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start hover:border-brand-gold hover:shadow-md transition-all group">
               <div className="w-14 h-14 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center shrink-0 mb-8 group-hover:scale-110 transition-transform">
                 <FileText className="w-6 h-6" />
               </div>
@@ -83,7 +83,7 @@ export default function CompliancePage() {
             <p className="text-gray-500 text-base leading-relaxed mb-8">
               Rest perfectly assured. The TaxWise Artificial Intelligence engine is rigorously aligned with the Federal Inland Revenue Service (FIRS) 2026 guidelines for digitalized tax collection across all 36 states.
             </p>
-            <div className="w-full h-1 bg-gradient-to-r from-brand-gold to-transparent mt-auto opacity-50"></div>
+            <div className="w-full h-1 bg-linear-to-r from-brand-gold to-transparent mt-auto opacity-50"></div>
           </div>
         </div>
 

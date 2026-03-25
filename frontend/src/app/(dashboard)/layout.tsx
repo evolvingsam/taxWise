@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { LogOut, Home, FileText, History, Settings, Bell, Search, ShieldCheck } from "lucide-react";
+import { Home, FileText, History, Bell, Search, ShieldCheck } from "lucide-react";
+import { LogoutButton } from "@/components/dashboard/LogoutButton";
+import { SettingsButton } from "@/components/dashboard/SettingsButton";
 
 export default function DashboardLayout({
   children,
@@ -40,15 +42,13 @@ export default function DashboardLayout({
                 AC
               </div>
             </div>
-            <Link href="/" className="text-gray-400 hover:text-red-500 transition-colors">
-              <LogOut className="h-5 w-5" />
-            </Link>
+            <LogoutButton />
           </div>
         </div>
       </header>
       <div className="container flex-1 items-start md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12 px-4 lg:px-8 py-10 mx-auto">
         <aside className="fixed top-24 z-30 -ml-2 hidden h-[calc(100vh-8rem)] w-full shrink-0 md:sticky md:block">
-          <div className="h-full pr-6 border-r border-gray-100 text-sm">
+          <div className="h-full pr-6 border-r border-gray-100 text-sm flex flex-col">
             <div className="space-y-1">
               <Link
                 href="/dashboard"
@@ -77,18 +77,10 @@ export default function DashboardLayout({
                 </div>
                 Ledger History
               </Link>
-              <Link
-                href="/coming-soon"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
-                  <Settings className="h-4 w-4" />
-                </div>
-                Settings
-              </Link>
+              <SettingsButton />
             </div>
 
-            <div className="mt-12 p-6 rounded-3xl bg-brand-dark text-white relative overflow-hidden">
+            <div className="mt-auto mb-8 p-6 rounded-3xl bg-brand-dark text-white relative overflow-hidden">
               <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-gold/10 rounded-full blur-xl"></div>
               <ShieldCheck className="w-8 h-8 text-brand-gold mb-4" />
               <h5 className="font-bold mb-2">Aegis Score</h5>
@@ -118,10 +110,7 @@ export default function DashboardLayout({
           <History className="h-5 w-5 mb-1" />
           <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
         </Link>
-        <Link href="/coming-soon" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
-          <Settings className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
-        </Link>
+        <SettingsButton mobile />
       </nav>
     </div>
   );

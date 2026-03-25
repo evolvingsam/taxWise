@@ -13,11 +13,11 @@ export default function AegisVisionPage() {
             <Sparkles className="w-3 h-3 fill-brand-gold" /> The Aegis Protocol
           </div>
           <h1 className="font-space text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter text-brand-dark leading-[1.1] md:leading-none">
-            FROM COMPLIANCE <br/>
+            FROM COMPLIANCE <br />
             <span className="text-brand-gold">TO WEALTH BUILDING.</span>
           </h1>
           <p className="text-xl text-gray-400 font-medium leading-relaxed max-w-2xl mx-auto">
-            We aren't just filing taxes. We are building the first-of-its-kind digital credit rating for every Nigerian. 
+            We aren't just filing taxes. We are building the first-of-its-kind digital credit rating for every Nigerian.
           </p>
         </div>
 
@@ -47,7 +47,7 @@ export default function AegisVisionPage() {
 
         <div className="bg-white border-4 border-brand-gold/20 p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem] text-center max-w-2xl mx-auto shadow-sm">
           <Building2 className="w-12 h-12 text-brand-gold mx-auto mb-6" />
-          <h3 className="text-2xl font-black font-space tracking-tight text-brand-dark mb-4 uppercase tracking-widest">Partner Banks</h3>
+          <h3 className="text-2xl font-black font-space text-brand-dark mb-4 uppercase tracking-widest">Partner Banks</h3>
           <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.4em] mb-8">Accessing the shadow economy</p>
           <div className="flex flex-wrap justify-center gap-8 opacity-30 grayscale hover:grayscale-0 transition-all cursor-not-allowed">
             <span className="font-black text-xl">ACCESS</span>

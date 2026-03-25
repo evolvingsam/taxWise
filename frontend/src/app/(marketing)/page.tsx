@@ -10,7 +10,7 @@ export default function LandingPage() {
       <section className="relative w-full pt-16 pb-24 lg:pt-32 lg:pb-40 overflow-hidden">
         {/* Background Accents */}
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-[800px] h-[800px] bg-brand-gold/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-brand-dark/[0.02] rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-brand-dark/2 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="container px-4 md:px-8 mx-auto flex flex-col items-center text-center">
           <div className="max-w-4xl space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
@@ -48,9 +48,9 @@ export default function LandingPage() {
               <img
                 src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070&auto=format&fit=crop"
                 alt="TaxWise Platform"
-                className="w-full aspect-[16/8] object-cover ring-1 ring-gray-100"
+                className="w-full aspect-16/8 object-cover ring-1 ring-gray-100"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/40 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-brand-dark/40 via-transparent to-transparent"></div>
 
               {/* UI Overlay Mockup */}
               <div className="absolute bottom-10 left-10 right-10 flex flex-col md:flex-row justify-between items-end gap-6">
@@ -116,8 +116,8 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="relative">
-              <div className="aspect-square bg-white/[0.02] rounded-full border border-white/5 flex items-center justify-center p-12">
-                <div className="aspect-square w-full bg-white/[0.03] rounded-full border border-white/5 flex items-center justify-center p-12">
+              <div className="aspect-square bg-white/2 rounded-full border border-white/5 flex items-center justify-center p-12">
+                <div className="aspect-square w-full bg-white/3 rounded-full border border-white/5 flex items-center justify-center p-12">
                   <Cpu className="w-32 h-32 text-brand-gold opacity-50 animate-pulse" />
                 </div>
               </div>
