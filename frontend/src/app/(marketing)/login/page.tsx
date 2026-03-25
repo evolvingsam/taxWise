@@ -11,12 +11,12 @@ export default function LoginPage() {
           <div className="mr-2 flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold">
             TE
           </div>
-          TaxEase
+          TaxWise
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg">
-              "TaxEase made filing my small business taxes incredibly simple. I just took a picture of my ledger and it handled the rest."
+              "TaxWise made filing my small business taxes incredibly simple. I just took a picture of my ledger and it handled the rest."
             </p>
             <footer className="text-sm">Chuka Obi, Lagos</footer>
           </blockquote>

@@ -20,5 +20,6 @@ export interface TaxRecord {
   method: IntakeMethod;
   status: 'pending' | 'assessed' | 'paid';
   assessment: TaxAssessmentRule;
+  category?: string;
   receiptUrl?: string;
 }
