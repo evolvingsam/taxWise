@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "apps.smart_intake",
+    "apps.tax_engine",
     
 ]
 
