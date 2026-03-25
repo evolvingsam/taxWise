@@ -15,13 +15,13 @@ export default function SignupPage() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to home
           </Link>
           
-          <div className="mb-10">
+          <div className="mb-10 animate-fade-in-up [animation-delay:200ms] opacity-0">
             <h2 className="text-3xl font-bold font-space text-brand-dark tracking-tight mb-2">Start your compliance journey</h2>
             <p className="text-gray-500">Create a free account to assess your liability. No credit card required.</p>
           </div>
           
           <form className="space-y-5">
-            <div className="space-y-2">
+            <div className="space-y-2 animate-fade-in-up [animation-delay:300ms] opacity-0">
               <label htmlFor="name" className="block text-sm font-bold text-brand-dark uppercase tracking-wider">Full Name</label>
               <input 
                 id="name" 
@@ -54,14 +54,14 @@ export default function SignupPage() {
               />
             </div>
             
-            <div className="pt-4">
+            <div className="pt-4 animate-fade-in-up [animation-delay:600ms] opacity-0">
               <Link href="/dashboard" className="w-full flex justify-center items-center py-4 rounded-xl bg-brand-dark text-white font-bold tracking-wide hover:bg-brand-gold hover:text-brand-dark transition-all duration-300 shadow-md">
                 Create Account
               </Link>
             </div>
           </form>
           
-          <p className="mt-8 text-center text-sm text-gray-500 font-medium pb-10">
+          <p className="mt-8 text-center text-sm text-gray-500 font-medium pb-10 animate-fade-in-up [animation-delay:700ms] opacity-0">
             Already have an account? <Link href="/login" className="text-brand-dark font-bold hover:text-brand-gold transition-colors">Sign in instead</Link>
           </p>
         </div>

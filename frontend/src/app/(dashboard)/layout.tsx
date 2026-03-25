@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Home, FileText, History, Bell, Search, ShieldCheck } from "lucide-react";
+import { Home, FileText, History, Bell, Search, ShieldCheck, Settings } from "lucide-react";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
-import { SettingsButton } from "@/components/dashboard/SettingsButton";
 
 export default function DashboardLayout({
   children,
@@ -77,7 +76,15 @@ export default function DashboardLayout({
                 </div>
                 Ledger History
               </Link>
-              <SettingsButton />
+              <Link
+                href="/settings"
+                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
+              >
+                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
+                  <Settings className="h-4 w-4" />
+                </div>
+                Settings
+              </Link>
             </div>
 
             <div className="mt-auto mb-8 p-6 rounded-3xl bg-brand-dark text-white relative overflow-hidden">
@@ -110,7 +117,10 @@ export default function DashboardLayout({
           <History className="h-5 w-5 mb-1" />
           <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
         </Link>
-        <SettingsButton mobile />
+        <Link href="/settings" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
+          <Settings className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
+        </Link>
       </nav>
     </div>
   );

@@ -13,7 +13,7 @@ export default function LandingPage() {
         <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/4 w-[600px] h-[600px] bg-brand-dark/2 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="container px-4 md:px-8 mx-auto flex flex-col items-center text-center">
-          <div className="max-w-4xl space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+          <div className="max-w-4xl space-y-10 animate-fade-in-up opacity-0">
             <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-brand-dark text-brand-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-xl">
               <Zap className="w-3 h-3 fill-brand-gold" /> The 2026 Tax Reform Standard
             </div>
@@ -43,7 +43,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-24 relative w-full max-w-6xl mx-auto px-4 group">
+          <div className="mt-24 relative w-full max-w-6xl mx-auto px-4 group animate-fade-in-up [animation-delay:400ms] opacity-0">
             <div className="relative rounded-[3rem] overflow-hidden shadow-[0_50px_100px_rgba(0,0,0,0.1)] border-8 border-white transform hover:-rotate-1 transition-transform duration-700">
               <img
                 src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070&auto=format&fit=crop"
@@ -54,7 +54,7 @@ export default function LandingPage() {
 
               {/* UI Overlay Mockup */}
               <div className="absolute bottom-10 left-10 right-10 flex flex-col md:flex-row justify-between items-end gap-6">
-                <div className="bg-white/90 backdrop-blur-md p-4 md:p-6 rounded-3xl shadow-md border border-white/50 max-w-[280px] md:max-w-sm animate-in slide-in-from-left-10 duration-1000">
+                <div className="bg-white/90 backdrop-blur-md p-4 md:p-6 rounded-3xl shadow-md border border-white/50 max-w-[280px] md:max-w-sm animate-slide-in-left [animation-delay:800ms] opacity-0">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-8 h-8 rounded-full bg-brand-dark text-brand-gold flex items-center justify-center">
                       <Sparkles className="w-4 h-4" />
@@ -68,7 +68,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="bg-brand-dark text-white p-8 rounded-[2.5rem] shadow-md border border-white/10 hidden lg:block animate-in slide-in-from-right-10 duration-1000">
+                <div className="bg-brand-dark text-white p-8 rounded-[2.5rem] shadow-md border border-white/10 hidden lg:block animate-slide-in-right [animation-delay:1000ms] opacity-0">
                   <div className="flex items-center gap-4 mb-4">
                     <Shield className="w-6 h-6 text-brand-gold" />
                     <div>
@@ -90,7 +90,7 @@ export default function LandingPage() {
       <section className="w-full py-24 bg-brand-dark text-white overflow-hidden">
         <div className="container px-4 md:px-8 mx-auto">
           <div className="grid lg:grid-cols-2 gap-20 items-center">
-            <div className="space-y-8">
+            <div className="space-y-8 animate-slide-in-left opacity-0 [animation-delay:200ms]">
               <h4 className="text-brand-gold font-bold uppercase tracking-[0.3em] text-xs">The Complexity Barrier</h4>
               <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-space tracking-tighter leading-[1.1] md:leading-none">
                 BUILT FOR <span className="text-white/20">CITIZENS,</span> <br />
@@ -141,7 +141,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group animate-fade-in-up opacity-0 [animation-delay:200ms]">
               <div className="w-20 h-20 rounded-3xl bg-brand-dark text-brand-gold flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <MessageSquare className="w-10 h-10" />
               </div>
@@ -152,7 +152,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group animate-fade-in-up opacity-0 [animation-delay:400ms]">
               <div className="w-20 h-20 rounded-3xl bg-brand-gold text-brand-dark flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <Cpu className="w-10 h-10" />
               </div>
@@ -163,7 +163,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group animate-fade-in-up opacity-0 [animation-delay:600ms]">
               <div className="w-20 h-20 rounded-3xl bg-brand-dark text-brand-gold flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-10 h-10" />
               </div>
@@ -179,7 +179,7 @@ export default function LandingPage() {
       {/* Vision / CTA Section */}
       <section className="w-full py-24 bg-white">
         <div className="container px-4 md:px-8 mx-auto">
-          <div className="bg-brand-dark rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-12 lg:p-24 overflow-hidden relative group shadow-md">
+          <div className="bg-brand-dark rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-12 lg:p-24 overflow-hidden relative group shadow-md animate-fade-in-up opacity-0 [animation-delay:200ms]">
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-brand-gold/10 rounded-full blur-3xl group-hover:bg-brand-gold/20 transition-all duration-1000"></div>
 
             <div className="max-w-3xl relative z-10">

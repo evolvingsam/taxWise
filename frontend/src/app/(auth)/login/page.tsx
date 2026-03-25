@@ -15,13 +15,13 @@ export default function LoginPage() {
             <ArrowLeft className="w-4 h-4 mr-2" /> Back to home
           </Link>
           
-          <div className="mb-10">
+          <div className="mb-10 animate-fade-in-up [animation-delay:200ms] opacity-0">
             <h2 className="text-3xl font-bold font-space text-brand-dark tracking-tight mb-2">Sign in to your account</h2>
             <p className="text-gray-500">Enter your credentials to access your dashboard.</p>
           </div>
           
           <form className="space-y-6">
-            <div className="space-y-2">
+            <div className="space-y-2 animate-fade-in-up [animation-delay:300ms] opacity-0">
               <label htmlFor="email" className="block text-sm font-bold text-brand-dark uppercase tracking-wider">Email Address</label>
               <input 
                 id="email" 
@@ -46,14 +46,14 @@ export default function LoginPage() {
               />
             </div>
             
-            <div className="pt-2">
+            <div className="pt-2 animate-fade-in-up [animation-delay:500ms] opacity-0">
               <Link href="/dashboard" className="w-full flex justify-center items-center py-4 rounded-xl bg-brand-dark text-white font-bold tracking-wide hover:bg-brand-gold hover:text-brand-dark transition-all duration-300 shadow-md">
                 Sign In securely
               </Link>
             </div>
           </form>
           
-          <p className="mt-8 text-center text-sm text-gray-500 font-medium">
+          <p className="mt-8 text-center text-sm text-gray-500 font-medium animate-fade-in-up [animation-delay:600ms] opacity-0">
             Don't have an account? <Link href="/signup" className="text-brand-dark font-bold hover:text-brand-gold transition-colors">Create one now</Link>
           </p>
         </div>

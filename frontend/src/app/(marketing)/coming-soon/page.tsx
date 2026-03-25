@@ -11,7 +11,7 @@ export default function ComingSoonPage() {
         <Hourglass className="w-10 h-10" />
       </div>
 
-      <div className="space-y-6 max-w-xl animate-in fade-in slide-in-from-bottom-10 duration-700">
+      <div className="space-y-6 max-w-xl animate-fade-in-up opacity-0 [animation-delay:200ms]">
         <h1 className="font-space text-5xl font-black tracking-tighter text-brand-dark leading-none uppercase">
           COMING <span className="text-brand-gold">SOON</span>
         </h1>

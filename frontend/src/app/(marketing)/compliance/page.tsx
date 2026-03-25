@@ -28,7 +28,7 @@ export default function CompliancePage() {
       <div className="container mx-auto px-4 lg:px-8">
 
         {/* Header Section */}
-        <div className="max-w-4xl mx-auto text-center mb-24 space-y-6">
+        <div className="max-w-4xl mx-auto text-center mb-24 space-y-6 animate-fade-in-up opacity-0">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-gold text-brand-dark text-[10px] font-black uppercase tracking-[0.2em] shadow-sm">
             2026 Fiscal Policy
           </div>
@@ -44,7 +44,7 @@ export default function CompliancePage() {
         {/* The 3 Core Reforms Grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           {reforms.map((reform, i) => (
-            <div key={i} className="bg-white p-6 md:p-10 rounded-4xl md:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start hover:border-brand-gold hover:shadow-md transition-all group">
+            <div key={i} className="bg-white p-6 md:p-10 rounded-4xl md:rounded-[2.5rem] border border-gray-100 shadow-sm flex flex-col items-start hover:border-brand-gold hover:shadow-md transition-all group animate-fade-in-up opacity-0" style={{ animationDelay: `${200 + i * 150}ms` }}>
               <div className="w-14 h-14 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center shrink-0 mb-8 group-hover:scale-110 transition-transform">
                 <FileText className="w-6 h-6" />
               </div>
@@ -59,7 +59,7 @@ export default function CompliancePage() {
 
         {/* Value Props Grid */}
         <div className="grid md:grid-cols-2 gap-8 mb-24">
-          <div className="bg-brand-dark text-white p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] flex flex-col justify-center relative overflow-hidden">
+          <div className="bg-brand-dark text-white p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] flex flex-col justify-center relative overflow-hidden animate-slide-in-left [animation-delay:600ms] opacity-0">
             <div className="absolute top-0 right-0 w-64 h-64 bg-brand-gold/10 blur-[80px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
             <div className="relative z-10 w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mb-8">
               <AlertCircle className="w-7 h-7 text-brand-gold" />
@@ -75,7 +75,7 @@ export default function CompliancePage() {
             </Link>
           </div>
 
-          <div className="bg-white border-2 border-brand-dark/5 p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] flex flex-col justify-center items-start group hover:border-brand-gold/20 transition-colors">
+          <div className="bg-white border-2 border-brand-dark/5 p-8 md:p-10 lg:p-14 rounded-[2.5rem] md:rounded-[3rem] flex flex-col justify-center items-start group hover:border-brand-gold/20 transition-colors animate-slide-in-right [animation-delay:700ms] opacity-0">
             <div className="w-14 h-14 rounded-2xl bg-brand-dark/5 flex items-center justify-center mb-8 group-hover:bg-brand-gold/10 transition-colors">
               <Shield className="w-7 h-7 text-brand-gold" />
             </div>
@@ -88,7 +88,7 @@ export default function CompliancePage() {
         </div>
 
         {/* Call to Action Footer */}
-        <div className="border-t border-gray-100 pt-20 flex flex-col items-center">
+        <div className="border-t border-gray-100 pt-20 flex flex-col items-center animate-fade-in-up [animation-delay:800ms] opacity-0">
           <div className="text-center max-w-2xl mb-10">
             <h2 className="text-4xl font-black font-space tracking-tight text-brand-dark mb-4">READY TO FILE?</h2>
             <p className="text-lg text-gray-500 font-medium">Join 50,000+ Nigerians who have already digitized their returns and secured their peace of mind.</p>

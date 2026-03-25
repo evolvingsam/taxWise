@@ -8,15 +8,15 @@ export default function DashboardPage() {
   const latestTax = mockLedger[0];
 
   return (
-    <div className="flex flex-col gap-10 w-full max-w-6xl mx-auto">
+    <div className="flex flex-col gap-10 w-full max-w-6xl mx-auto animate-fade-in">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
+        <div className="animate-fade-in-up [animation-delay:100ms] opacity-0">
           <h1 className="font-space text-4xl font-black tracking-tighter text-brand-dark">Dashboard</h1>
           <p className="text-gray-500 font-medium mt-1">
             Welcome back, {mockUser.name.split(" ")[0]}. Your verified fiscal identity is in good standing.
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 animate-fade-in-up [animation-delay:200ms] opacity-0">
           <ExportButton />
           <Link href="/intake">
             <Button className="rounded-full bg-brand-dark text-white hover:bg-brand-gold hover:text-brand-dark transition-all px-8 shadow-md">
@@ -28,7 +28,7 @@ export default function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Aegis Score Card - Feature 3: The Innovation */}
-        <div className="rounded-[2.5rem] bg-brand-dark text-white p-8 flex flex-col justify-between shadow-md relative overflow-hidden group">
+        <div className="rounded-[2.5rem] bg-brand-dark text-white p-8 flex flex-col justify-between shadow-md relative overflow-hidden group animate-fade-in-up [animation-delay:300ms] opacity-0">
           <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-gold/5 rounded-full blur-3xl group-hover:bg-brand-gold/10 transition-all duration-700"></div>
           <div className="relative z-10 flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
@@ -57,7 +57,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Tax Liability Card - Feature 2: Universal Tax Engine */}
-        <div className="rounded-[2.5rem] border bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+        <div className="rounded-[2.5rem] border bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow animate-fade-in-up [animation-delay:400ms] opacity-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400">Tax Liability (2025)</h3>
             <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center text-brand-dark">
@@ -82,7 +82,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick Action Card */}
-        <div className="rounded-[2.5rem] border bg-muted/30 p-8 flex flex-col items-center text-center justify-center border-dashed border-gray-300 hover:border-brand-gold/50 transition-colors group">
+        <div className="rounded-[2.5rem] border bg-muted/30 p-8 flex flex-col items-center text-center justify-center border-dashed border-gray-300 hover:border-brand-gold/50 transition-colors group animate-fade-in-up [animation-delay:500ms] opacity-0">
           <div className="w-16 h-16 rounded-3xl bg-white shadow-sm flex items-center justify-center text-brand-gold group-hover:scale-110 transition-transform duration-300 mb-6">
             <Sparkles className="w-8 h-8" />
           </div>
@@ -96,7 +96,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="rounded-[2.5rem] border bg-white shadow-sm overflow-hidden">
+      <div className="rounded-[2.5rem] border bg-white shadow-sm overflow-hidden animate-fade-in-up [animation-delay:600ms] opacity-0">
         <div className="flex flex-col space-y-1 p-8 border-b bg-muted/10">
           <h3 className="font-bold text-xl tracking-tight">Recent Activity</h3>
           <p className="text-xs text-gray-400 uppercase tracking-widest font-bold">Your Fiscal Trace</p>
