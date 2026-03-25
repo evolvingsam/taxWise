@@ -12,7 +12,7 @@ export default function AegisVisionPage() {
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-brand-dark text-brand-gold text-[10px] font-black uppercase tracking-[0.3em]">
             <Sparkles className="w-3 h-3 fill-brand-gold" /> The Aegis Protocol
           </div>
-          <h1 className="font-space text-5xl md:text-7xl font-black tracking-tighter text-brand-dark leading-none">
+          <h1 className="font-space text-4xl md:text-5xl lg:text-7xl font-black tracking-tighter text-brand-dark leading-[1.1] md:leading-none">
             FROM COMPLIANCE <br/>
             <span className="text-brand-gold">TO WEALTH BUILDING.</span>
           </h1>
@@ -22,7 +22,7 @@ export default function AegisVisionPage() {
         </div>
 
         <div className="grid md:grid-cols-2 gap-12 mb-24">
-          <div className="bg-[#FDFDFD] p-12 rounded-[3.5rem] border border-gray-100 space-y-6 group hover:shadow-xl transition-all">
+          <div className="bg-[#FDFDFD] p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-gray-100 space-y-6 group hover:shadow-xl transition-all">
             <div className="w-16 h-16 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center group-hover:scale-110 transition-transform">
               <Shield className="w-8 h-8" />
             </div>
@@ -31,7 +31,7 @@ export default function AegisVisionPage() {
               By linking your NIN and filing even zero-tax returns, you prove your fiscal existence. This is the foundation of the Aegis Score.
             </p>
           </div>
-          <div className="bg-brand-dark p-12 rounded-[3.5rem] text-white space-y-6 group hover:shadow-2xl transition-all relative overflow-hidden">
+          <div className="bg-brand-dark p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] text-white space-y-6 group hover:shadow-2xl transition-all relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-5">
               <TrendingUp className="w-40 h-40" />
             </div>
@@ -45,7 +45,7 @@ export default function AegisVisionPage() {
           </div>
         </div>
 
-        <div className="bg-white border-4 border-brand-gold/20 p-12 rounded-[4rem] text-center max-w-2xl mx-auto shadow-sm">
+        <div className="bg-white border-4 border-brand-gold/20 p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem] text-center max-w-2xl mx-auto shadow-sm">
           <Building2 className="w-12 h-12 text-brand-gold mx-auto mb-6" />
           <h3 className="text-2xl font-black font-space tracking-tight text-brand-dark mb-4 uppercase tracking-widest">Partner Banks</h3>
           <p className="text-gray-400 font-bold text-xs uppercase tracking-[0.4em] mb-8">Accessing the shadow economy</p>

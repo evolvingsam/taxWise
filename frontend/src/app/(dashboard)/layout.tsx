@@ -99,10 +99,30 @@ export default function DashboardLayout({
             </div>
           </div>
         </aside>
-        <main className="flex w-full flex-col overflow-hidden">
+        <main className="flex w-full flex-col overflow-hidden pb-24 md:pb-0">
           {children}
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-md border-t border-gray-100 p-4 md:hidden pb-safe">
+        <Link href="/dashboard" className="flex flex-col items-center text-brand-dark">
+          <Home className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Home</span>
+        </Link>
+        <Link href="/intake" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
+          <FileText className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Intake</span>
+        </Link>
+        <Link href="/history" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
+          <History className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
+        </Link>
+        <Link href="/coming-soon" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
+          <Settings className="h-5 w-5 mb-1" />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
+        </Link>
+      </nav>
     </div>
   );
 }

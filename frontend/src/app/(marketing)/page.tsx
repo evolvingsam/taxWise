@@ -18,7 +18,7 @@ export default function LandingPage() {
               <Zap className="w-3 h-3 fill-brand-gold" /> The 2026 Tax Reform Standard
             </div>
 
-            <h1 className="font-space text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter text-brand-dark leading-[0.95]">
+            <h1 className="font-space text-4xl md:text-6xl lg:text-8xl font-black tracking-tighter text-brand-dark leading-[1.05] md:leading-[0.95]">
               TAX FILING, <br className="hidden md:block" />
               <span className="text-brand-gold underline decoration-brand-dark/10">ZERO FRICTION.</span>
             </h1>
@@ -54,7 +54,7 @@ export default function LandingPage() {
 
               {/* UI Overlay Mockup */}
               <div className="absolute bottom-10 left-10 right-10 flex flex-col md:flex-row justify-between items-end gap-6">
-                <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-md border border-white/50 max-w-sm animate-in slide-in-from-left-10 duration-1000">
+                <div className="bg-white/90 backdrop-blur-md p-4 md:p-6 rounded-3xl shadow-md border border-white/50 max-w-[280px] md:max-w-sm animate-in slide-in-from-left-10 duration-1000">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-8 h-8 rounded-full bg-brand-dark text-brand-gold flex items-center justify-center">
                       <Sparkles className="w-4 h-4" />
@@ -92,7 +92,7 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-20 items-center">
             <div className="space-y-8">
               <h4 className="text-brand-gold font-bold uppercase tracking-[0.3em] text-xs">The Complexity Barrier</h4>
-              <h2 className="text-5xl lg:text-7xl font-black font-space tracking-tighter leading-none">
+              <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-space tracking-tighter leading-[1.1] md:leading-none">
                 BUILT FOR <span className="text-white/20">CITIZENS,</span> <br />
                 NOT ACCOUNTANTS.
               </h2>
@@ -141,7 +141,7 @@ export default function LandingPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Feature 1 */}
-            <div className="bg-white p-12 rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
               <div className="w-20 h-20 rounded-3xl bg-brand-dark text-brand-gold flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <MessageSquare className="w-10 h-10" />
               </div>
@@ -152,7 +152,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white p-12 rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
               <div className="w-20 h-20 rounded-3xl bg-brand-gold text-brand-dark flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <Cpu className="w-10 h-10" />
               </div>
@@ -163,7 +163,7 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white p-12 rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
+            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group">
               <div className="w-20 h-20 rounded-3xl bg-brand-dark text-brand-gold flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                 <BarChart3 className="w-10 h-10" />
               </div>
@@ -179,11 +179,11 @@ export default function LandingPage() {
       {/* Vision / CTA Section */}
       <section className="w-full py-24 bg-white">
         <div className="container px-4 md:px-8 mx-auto">
-          <div className="bg-brand-dark rounded-[4rem] p-12 lg:p-24 overflow-hidden relative group shadow-md">
+          <div className="bg-brand-dark rounded-[2.5rem] md:rounded-[4rem] p-8 md:p-12 lg:p-24 overflow-hidden relative group shadow-md">
             <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[600px] h-[600px] bg-brand-gold/10 rounded-full blur-3xl group-hover:bg-brand-gold/20 transition-all duration-1000"></div>
 
             <div className="max-w-3xl relative z-10">
-              <h2 className="text-5xl lg:text-7xl font-black font-space tracking-tighter text-white mb-8 leading-none">
+              <h2 className="text-4xl md:text-5xl lg:text-7xl font-black font-space tracking-tighter text-white mb-6 md:mb-8 leading-[1.1] md:leading-none">
                 READY TO BUILD YOUR <span className="text-brand-gold italic">FISCAL IDENTITY?</span>
               </h2>
               <p className="text-gray-400 text-xl font-medium mb-12 max-w-xl">
