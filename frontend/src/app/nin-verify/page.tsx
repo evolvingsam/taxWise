@@ -34,7 +34,7 @@ export default function NINVerifyPage() {
 
         {step === "nin" && (
           <div className="animate-in fade-in slide-in-from-bottom-5">
-            <div className="w-16 h-16 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center mb-8 shadow-xl">
+            <div className="w-16 h-16 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center mb-8 shadow-md">
               <Fingerprint className="w-8 h-8" />
             </div>
             <h1 className="text-4xl font-black font-space tracking-tight text-brand-dark mb-4">Identity Verification</h1>
@@ -81,7 +81,7 @@ export default function NINVerifyPage() {
             <button onClick={() => setStep("nin")} className="flex items-center gap-2 text-gray-400 hover:text-brand-dark mb-8 font-bold text-xs uppercase tracking-widest">
               <ArrowLeft className="w-4 h-4" /> Go Back
             </button>
-            <div className="w-16 h-16 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center mb-8 shadow-xl">
+            <div className="w-16 h-16 rounded-2xl bg-brand-dark text-brand-gold flex items-center justify-center mb-8 shadow-md">
               <Smartphone className="w-8 h-8" />
             </div>
             <h1 className="text-4xl font-black font-space tracking-tight text-brand-dark mb-4">Security Code</h1>
@@ -140,7 +140,7 @@ export default function NINVerifyPage() {
             </div>
 
             <Link href="/dashboard" className="block w-full">
-              <Button className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-brand-dark/20 flex items-center justify-center gap-3 group">
+              <Button className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-md flex items-center justify-center gap-3 group">
                 Enter Dashboard <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>

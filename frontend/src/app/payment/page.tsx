@@ -24,7 +24,7 @@ export default function PaymentPage() {
         {status === "selecting" && (
           <div className="animate-in fade-in slide-in-from-bottom-5">
             <div className="flex items-center justify-between mb-8">
-              <div className="w-12 h-12 rounded-xl bg-brand-dark text-brand-gold flex items-center justify-center shadow-lg">
+              <div className="w-12 h-12 rounded-xl bg-brand-dark text-brand-gold flex items-center justify-center shadow-sm">
                 <CreditCard className="w-6 h-6" />
               </div>
               <div className="flex items-center gap-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-muted rounded-full px-4 py-1.5">
@@ -68,7 +68,7 @@ export default function PaymentPage() {
 
             <Button 
               onClick={handlePay}
-              className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-dark transition-all shadow-xl shadow-brand-dark/10"
+              className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-dark transition-all shadow-md"
             >
               Pay via Interswitch
             </Button>
