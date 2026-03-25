@@ -18,6 +18,7 @@ export const mockLedger: TaxRecord[] = [
       taxDue: 45000,
       incomeEstimated: 1200000,
     },
+    category: "Small Business",
     receiptUrl: "/receipts/TX-99201.pdf",
   },
   {
@@ -31,6 +32,7 @@ export const mockLedger: TaxRecord[] = [
       reason: "Annual income below minimum taxable threshold (₦300,000)",
       incomeEstimated: 250000,
     },
+    category: "Personal Income",
     receiptUrl: "/receipts/TX-99202.pdf",
   }
 ];
@@ -45,5 +47,6 @@ export const mockPendingTax: TaxRecord = {
     isExempt: false,
     taxDue: 15500,
     incomeEstimated: 600000,
-  }
+  },
+  category: "Freelance Services"
 };

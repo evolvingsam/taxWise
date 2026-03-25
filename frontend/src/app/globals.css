@@ -18,31 +18,37 @@
   --color-warning-foreground: var(--warning-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  
+  /* Brand specific colors */
+  --color-brand-gold: #FBB03B;
+  --color-brand-dark: #1A1A1A;
+  
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
 }
 
 @layer base {
   :root {
-    --background: #f8fafc; /* Very light slate for trustworthy civic feel */
-    --foreground: #0f172a;
-    --primary: #2563eb; /* Strong, trustworthy blue */
-    --primary-foreground: #ffffff;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --border: #e2e8f0;
-    --card: #ffffff;
-    --card-foreground: #0f172a;
-    --accent: #dbeafe;
-    --accent-foreground: #1e3a8a;
-    --success: #22c55e;
+    --background: #FFFFFF;
+    --foreground: #1A1A1A;
+    --primary: #1A1A1A;
+    --primary-foreground: #FFFFFF;
+    --muted: #F7F7F7;
+    --muted-foreground: #666666;
+    --border: #EEEEEE;
+    --card: #FFFFFF;
+    --card-foreground: #1A1A1A;
+    --accent: #FBB03B;
+    --accent-foreground: #1A1A1A;
+    --success: #34D399; /* Emerald/Teal from AJH */
     --success-foreground: #ffffff;
-    --warning: #f59e0b;
-    --warning-foreground: #ffffff;
-    --destructive: #ef4444;
+    --warning: #FBB03B;
+    --warning-foreground: #1A1A1A;
+    --destructive: #EF4444;
     --destructive-foreground: #ffffff;
   }
 }
@@ -52,7 +58,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20;
+    @apply bg-background text-foreground antialiased selection:bg-accent/20;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
