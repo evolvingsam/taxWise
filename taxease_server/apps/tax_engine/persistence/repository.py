@@ -1,25 +1,15 @@
-from django.utils import timezone
+from django.contrib.auth import get_user_model
 from apps.smart_intake.persistence.models import IntakeLedgerEntry
-from .models import TaxProfile, TaxCalculationResult
+from .models import TaxCalculationResult
 from ..utils.logging import get_logger
 
+User = get_user_model()
 logger = get_logger(__name__)
 
 
 class TaxEngineRepository:
-    """
-    All DB reads and writes for the Tax Engine.
-    Nothing outside this class touches models directly.
-    """
 
-    def get_or_create_profile(self, user_id: str) -> TaxProfile:
-        profile, created = TaxProfile.objects.get_or_create(user_id=user_id)
-        if created:
-            logger.info("Created new TaxProfile for user=%s", user_id)
-        return profile
-
-    def get_pending_ledger_entries(self, user_id: str) -> list:
-        """Fetch all pending IntakeLedgerEntries for this user."""
+    def get_pending_ledger_entries(self, user_id: int) -> list:
         return list(
             IntakeLedgerEntry.objects.filter(
                 user_id=user_id,
@@ -27,8 +17,7 @@ class TaxEngineRepository:
             )
         )
 
-    def get_all_ledger_entries_this_year(self, user_id: str, year: int) -> list:
-        """Fetch all ledger entries for the current tax year for WAEC grading."""
+    def get_all_ledger_entries_this_year(self, user_id: int, year: int) -> list:
         return list(
             IntakeLedgerEntry.objects.filter(
                 user_id=user_id,
@@ -37,17 +26,26 @@ class TaxEngineRepository:
         )
 
     def mark_entries_processed(self, entries: list):
-        """Mark all IntakeLedgerEntries as processed after calculation."""
         ids = [e.id for e in entries]
         IntakeLedgerEntry.objects.filter(id__in=ids).update(
             status=IntakeLedgerEntry.STATUS_PROCESSED
         )
-        logger.info("Marked %d ledger entries as processed.", len(ids))
+        logger.info("Marked %d entries as processed.", len(ids))
 
-    def save_result(self, result_data: dict) -> TaxCalculationResult:
-        result = TaxCalculationResult.objects.create(**result_data)
-        logger.info(
-            "TaxCalculationResult saved: id=%s user=%s status=%s",
-            result.id, result.user_id, result.status,
-        )
+    def save_result(self, user_id: int, result_data: dict) -> TaxCalculationResult:
+        user = User.objects.get(id=user_id)
+        result_data.pop("user_id", None)   # remove string user_id if present
+        result = TaxCalculationResult.objects.create(user=user, **result_data)
+        logger.info("TaxCalculationResult saved: id=%s", result.id)
         return result
+
+    def upgrade_waec_to_a(self, user_id: int, tax_year: int):
+        result = TaxCalculationResult.objects.filter(
+            user_id=user_id,
+            tax_year=tax_year,
+        ).order_by("-created_at").first()
+
+        if result:
+            result.waec_grade = "A"
+            result.save()
+            logger.info("WAEC upgraded to A. user_id=%s year=%d", user_id, tax_year)

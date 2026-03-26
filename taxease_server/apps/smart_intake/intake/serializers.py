@@ -4,10 +4,6 @@ from rest_framework import serializers
 class IntakeInputSerializer(serializers.Serializer):
     """Payload the client sends to the Smart Intake endpoint."""
 
-    user_id = serializers.CharField(
-        max_length=128,
-        help_text="Unique identifier for the user.",
-    )
     raw_text = serializers.CharField(
         max_length=2000,
         help_text=(

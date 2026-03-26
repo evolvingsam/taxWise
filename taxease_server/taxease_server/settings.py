@@ -1,5 +1,6 @@
 from pathlib import Path
 from decouple import config, Csv
+from datetime import timedelta
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,6 +17,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework_simplejwt.token_blacklist",
+
 
     # Third party
     "rest_framework",
@@ -24,6 +27,8 @@ INSTALLED_APPS = [
     # Local apps
     "apps.smart_intake",
     "apps.tax_engine",
+    "apps.payments",
+    "apps.accounts",
     
 ]
 
@@ -92,14 +97,27 @@ USE_TZ        = True
 STATIC_URL  = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+AUTH_USER_MODEL = "accounts.User"
 
 # ── Default Primary Key ────────────────────────────────────────────────────────
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME":  timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS":  True,
+    "BLACKLIST_AFTER_ROTATION": True,
+}
 
 # ── Django REST Framework ──────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",  # locked by default
+    ],
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
@@ -121,9 +139,14 @@ SPECTACULAR_SETTINGS = {
 }
 
 
+# ── Gemini ────────────────────────────────────────────────────────────────────
+GEMINI_API_KEY = config("GEMINI_API_KEY")
+GEMINI_MODEL   = config("GEMINI_MODEL", default="gemini-1.5-flash")
+
 # ── OpenAI ────────────────────────────────────────────────────────────────────
 OPENAI_API_KEY = config("OPENAI_API_KEY")
 OPENAI_MODEL   = config("OPENAI_MODEL", default="gpt-4o-mini")
+
 
 
 # ── Logging ───────────────────────────────────────────────────────────────────

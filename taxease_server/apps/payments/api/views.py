@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
 
@@ -22,13 +22,15 @@ class InitiatePaymentView(APIView):
     Called by the frontend BEFORE opening the Interswitch modal.
     Creates a pending transaction record so the webhook has something to update.
     """
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
         tags=["Payments"],
         summary="Initiate a payment transaction",
         description=(
             "Creates a pending PaymentTransaction record. "
-            "Must be called before the Interswitch WebPay modal is opened."
+            "Must be called before the Interswitch WebPay modal is opened. "
+            "User identity is taken from the JWT token."
         ),
         request=InitiatePaymentSerializer,
         responses={
@@ -40,13 +42,19 @@ class InitiatePaymentView(APIView):
                 response=PaymentErrorResponseSerializer,
                 description="Invalid request payload.",
             ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided.",
+            ),
+            500: OpenApiResponse(
+                response=PaymentErrorResponseSerializer,
+                description="Internal server error.",
+            ),
         },
         examples=[
             OpenApiExample(
                 name="Initiate filing fee payment",
                 request_only=True,
                 value={
-                    "user_id":  "usr_abc123",
                     "tx_ref":   "TAXEASE-usr_abc123-1711234567",
                     "amount":   1000.00,
                     "tax_year": 2026,
@@ -68,7 +76,7 @@ class InitiatePaymentView(APIView):
 
         try:
             orchestrator.initiate_transaction(
-                user_id  = data["user_id"],
+                user_id  = request.user.id,    # ← from JWT, not request body
                 tx_ref   = data["tx_ref"],
                 amount   = data["amount"],
                 tax_year = data["tax_year"],
@@ -94,7 +102,9 @@ class InterswitchWebhookView(APIView):
     """
     Receives Interswitch's silent POST callback after payment.
     Verifies the signature, generates the RRR, and updates the DB.
+    No authentication required — Interswitch cannot send a Bearer token.
     """
+    permission_classes = [permissions.AllowAny]
 
     @extend_schema(
         tags=["Payments"],

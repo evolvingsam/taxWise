@@ -1,9 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, permissions
 
-from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
-from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse
 
 from .serializers import TaxCalculationResponseSerializer, TaxErrorResponseSerializer
 from ..pipeline.orchestrator import TaxEngineOrchestrator
@@ -13,46 +12,24 @@ logger = get_logger(__name__)
 
 
 class TaxCalculateView(APIView):
-    """
-    Triggers the full tax calculation pipeline for a user.
-    Pulls all pending ledger entries, applies 2026 tax rules,
-    grades compliance, and returns a full breakdown.
-    """
+    permission_classes = [permissions.IsAuthenticated]
 
     @extend_schema(
         tags=["Tax Engine"],
-        summary="Calculate tax for a user",
+        summary="Calculate tax for the authenticated user",
         description=(
             "Triggers the full 2026 Nigerian tax calculation pipeline. "
-            "Assembles all pending ledger entries, applies exemption filters, "
-            "deductions, progressive brackets, and returns a WAEC compliance grade."
+            "User identity and entity type are taken from the JWT token. "
+            "No parameters needed — just send your Bearer token."
         ),
-        parameters=[
-            OpenApiParameter(
-                name="user_id",
-                type=OpenApiTypes.STR,
-                location=OpenApiParameter.QUERY,
-                required=True,
-                description="The unique identifier of the user.",
-            )
-        ],
         responses={
-            200: OpenApiResponse(
-                response=TaxCalculationResponseSerializer,
-                description="Tax calculation completed successfully.",
-            ),
-            400: OpenApiResponse(
-                response=TaxErrorResponseSerializer,
-                description="Missing or invalid user_id.",
-            ),
-            500: OpenApiResponse(
-                response=TaxErrorResponseSerializer,
-                description="Internal engine failure.",
-            ),
+            200: OpenApiResponse(response=TaxCalculationResponseSerializer),
+            401: OpenApiResponse(description="Authentication credentials were not provided."),
+            500: OpenApiResponse(response=TaxErrorResponseSerializer),
         },
         examples=[
             OpenApiExample(
-                name="Taxable individual result",
+                name="Taxable individual",
                 response_only=True,
                 status_codes=["200"],
                 value={
@@ -65,47 +42,25 @@ class TaxCalculateView(APIView):
                         "platform_filing_fee": 1000,
                     },
                     "tax_waec_result": "A",
-                    "message": "Your WAEC compliance grade is A. Pay ₦45,000 in tax plus the ₦1,000 filing fee.",
-                },
-            ),
-            OpenApiExample(
-                name="Exempt individual result",
-                response_only=True,
-                status_codes=["200"],
-                value={
-                    "status": "exempt",
-                    "breakdown": {
-                        "gross_income":        600000,
-                        "deductions_applied":  0,
-                        "taxable_income":      0,
-                        "final_tax_owed":      0,
-                        "platform_filing_fee": 1000,
-                    },
-                    "tax_waec_result": "B",
-                    "message": "Income is below the ₦800,000 threshold. Pay ₦1,000 to get your Zero-Tax Certificate.",
+                    "message": "Pay ₦45,000 in tax plus ₦1,000 filing fee.",
                 },
             ),
         ],
     )
     def get(self, request):
-        user_id = request.query_params.get("user_id")
+        user_id     = str(request.user.id)
+        entity_type = request.user.user_type   # pulled directly from JWT/User model
 
-        if not user_id:
-            return Response(
-                {"status": "error", "message": "user_id is required."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        logger.info("Tax calculation requested. user_id=%s", user_id)
+        logger.info(
+            "Tax calculation requested. user_id=%s entity_type=%s",
+            user_id, entity_type,
+        )
 
         orchestrator = TaxEngineOrchestrator()
-        engine_result = orchestrator.run(user_id)
+        engine_result = orchestrator.run(user_id=user_id, entity_type=entity_type)
 
         if engine_result.success:
-            return Response(
-                engine_result.to_response_dict(),
-                status=status.HTTP_200_OK,
-            )
+            return Response(engine_result.to_response_dict(), status=status.HTTP_200_OK)
 
         return Response(
             {"status": "error", "message": engine_result.error},

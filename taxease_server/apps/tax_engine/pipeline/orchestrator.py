@@ -56,11 +56,10 @@ class TaxEngineOrchestrator:
 
         # ── Stage 1: Assemble ──────────────────────────────────────────────────
         try:
-            data = self.assembler.assemble(user_id, tax_year)
+            data = self.assembler.assemble(user_id, tax_year, entity_type)
         except Exception as e:
             logger.error("Data assembly failed: %s", str(e), exc_info=True)
             return EngineResult(success=False, error="Failed to retrieve your financial data.")
-
         # ── Stage 2: WAEC Grade (always runs, parallel to tax math) ───────────
         try:
             waec = self.grader.grade(data)

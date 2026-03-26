@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 
 from ..intake.validators import RawIntakePayload
-from ..ai_parsing.openai_parser import OpenAIFinancialParser
+from ..ai_parsing.gemini_parser import GeminiFinancialParser
 from ..ai_parsing.parser import ParsedFinancialData
 from ..ai_parsing.exceptions import AIParsingError, AIServiceUnavailableError
 from ..ledger.writer import LedgerWriter
@@ -38,7 +38,7 @@ class IntakePipelineOrchestrator:
     """
 
     def __init__(self):
-        self.parser        = OpenAIFinancialParser()
+        self.parser        = GeminiFinancialParser()
         self.ledger_writer = LedgerWriter()
 
     def run(self, payload: RawIntakePayload) -> PipelineResult:

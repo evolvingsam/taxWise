@@ -1,16 +1,12 @@
 import uuid
 from django.db import models
+from django.conf import settings
 
 
 class PaymentTransaction(models.Model):
-    """
-    Records every payment attempt and its outcome.
-    Created when the frontend initiates payment, updated when webhook fires.
-    """
-
-    STATUS_PENDING  = "pending"
-    STATUS_PAID     = "paid"
-    STATUS_FAILED   = "failed"
+    STATUS_PENDING = "pending"
+    STATUS_PAID    = "paid"
+    STATUS_FAILED  = "failed"
 
     STATUS_CHOICES = [
         (STATUS_PENDING, "Pending"),
@@ -19,9 +15,11 @@ class PaymentTransaction(models.Model):
     ]
 
     id                    = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user_id               = models.CharField(max_length=128, db_index=True)
-
-    # Interswitch fields
+    user                  = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="payment_transactions",
+    )
     interswitch_tx_ref    = models.CharField(max_length=256, unique=True, db_index=True)
     interswitch_order_ref = models.CharField(max_length=256, blank=True)
     amount                = models.DecimalField(max_digits=10, decimal_places=2)
@@ -31,12 +29,9 @@ class PaymentTransaction(models.Model):
         default=STATUS_PENDING,
         db_index=True,
     )
-
-    # Post-payment
     rrr_code              = models.CharField(max_length=50, blank=True, null=True)
     tax_year              = models.IntegerField()
-    raw_webhook_payload   = models.JSONField(default=dict)  # full audit trail
-
+    raw_webhook_payload   = models.JSONField(default=dict)
     created_at            = models.DateTimeField(auto_now_add=True)
     updated_at            = models.DateTimeField(auto_now=True)
 
@@ -44,4 +39,4 @@ class PaymentTransaction(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"PaymentTransaction({self.user_id}, {self.status}, {self.interswitch_tx_ref})"
+        return f"PaymentTransaction({self.user.email}, {self.status})"
