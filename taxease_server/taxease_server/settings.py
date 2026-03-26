@@ -172,14 +172,9 @@ LOGGING = {
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        "file": {
-            "class": "logging.FileHandler",
-            "filename": BASE_DIR / "logs/taxease.log",
-            "formatter": "verbose",
-        },
     },
     "root": {
-        "handlers": ["console", "file"],
+        "handlers": ["console"],
         "level": "DEBUG" if DEBUG else "INFO",
     },
     "loggers": {
@@ -189,7 +184,17 @@ LOGGING = {
             "propagate": False,
         },
         "apps.smart_intake": {
-            "handlers": ["console", "file"],
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "apps.tax_engine": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": False,
+        },
+        "apps.payments": {
+            "handlers": ["console"],
             "level": "DEBUG",
             "propagate": False,
         },
