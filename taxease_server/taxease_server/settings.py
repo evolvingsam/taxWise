@@ -1,6 +1,7 @@
 from pathlib import Path
 from decouple import config, Csv
 from datetime import timedelta
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -75,6 +76,8 @@ DATABASES = {
         "NAME": BASE_DIR / "db.sqlite3",
     }
 }
+
+DATABASES["default"] = dj_database_url.parse("postgresql://taxease_user:2uYLYjnZl31WOwELHVwacYg8qtNb0zsA@dpg-d72k8schg0os738mre8g-a.oregon-postgres.render.com/taxease")
 
 
 # ── Password Validators ────────────────────────────────────────────────────────
