@@ -11,12 +11,9 @@ urlpatterns = [
 
     # App routes
     path("api/smart-intake/", include("apps.smart_intake.urls")),
-<<<<<<< HEAD
     path("api/tax-engine/",   include("apps.tax_engine.urls")),
     path("api/payments/",     include("apps.payments.urls")),
 
-=======
->>>>>>> smart_intake_test
 
     # Global API docs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

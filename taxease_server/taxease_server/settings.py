@@ -23,6 +23,8 @@ INSTALLED_APPS = [
 
     # Local apps
     "apps.smart_intake",
+    "apps.tax_engine",
+    
 ]
 
 
