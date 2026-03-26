@@ -1,7 +1,7 @@
 // @ts-nocheck
 export const API_URL = "http://localhost:8000/api/accounts";
 
-export async function login(email, password) {
+export async function login(email: string, password: string) {
   const res = await fetch(`${API_URL}/login/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -12,7 +12,7 @@ export async function login(email, password) {
   return data;
 }
 
-export async function register(userData) {
+export async function register(userData: any) {
   const res = await fetch(`${API_URL}/register/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -23,7 +23,7 @@ export async function register(userData) {
   return data;
 }
 
-export async function getProfile(token) {
+export async function getProfile(token: string) {
   const res = await fetch(`${API_URL}/me/`, {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` },
@@ -33,7 +33,7 @@ export async function getProfile(token) {
   return data;
 }
 
-export async function refreshToken(refresh) {
+export async function refreshToken(refresh: string) {
   const res = await fetch(`${API_URL}/token/refresh/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -44,7 +44,7 @@ export async function refreshToken(refresh) {
   return data;
 }
 
-export async function logout(refresh) {
+export async function logout(refresh: string) {
   const res = await fetch(`${API_URL}/logout/`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

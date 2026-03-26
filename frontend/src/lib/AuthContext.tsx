@@ -1,13 +1,13 @@
-// @ts-nocheck
+// @ts-nocheckg
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import * as api from "./api";
 import Cookies from "js-cookie";
 
-const AuthContext = createContext(null);
+const AuthContext = createContext<any>(null);
 
-export function AuthProvider({ children }) {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -29,14 +29,14 @@ export function AuthProvider({ children }) {
     loadUser();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email: string, password: string) => {
     const data = await api.login(email, password);
     Cookies.set("access_token", data.access, { expires: 1, secure: true, sameSite: 'strict' });
     Cookies.set("refresh_token", data.refresh, { expires: 7, secure: true, sameSite: 'strict' });
     setUser(data.user);
   };
 
-  const register = async (userData) => {
+  const register = async (userData: any) => {
     await api.register(userData);
     // After registration, depending on the flow, they might need to log in separately
     // Or we could auto log them in: await login(userData.email, userData.password);
