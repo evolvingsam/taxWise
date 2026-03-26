@@ -1,5 +1,5 @@
 import json
-import google.generativeai as genai
+import google.genai as genai
 from django.conf import settings
 
 from .parser import BaseFinancialParser, ParsedFinancialData
