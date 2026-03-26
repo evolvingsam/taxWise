@@ -11,6 +11,9 @@ DEBUG      = config("DEBUG", default=False, cast=bool)
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost", cast=Csv())
 
 
+# ── Application Definition ─────────────────────────────────────────────────────
+
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -24,6 +27,7 @@ INSTALLED_APPS = [
     # Third party
     "rest_framework",
     "drf_spectacular",
+    'corsheaders',  
 
     # Local apps
     "apps.smart_intake",
@@ -43,6 +47,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 
@@ -77,7 +82,7 @@ DATABASES = {
     }
 }
 
-DATABASES["default"] = dj_database_url.parse("postgresql://taxease_user:2uYLYjnZl31WOwELHVwacYg8qtNb0zsA@dpg-d72k8schg0os738mre8g-a.oregon-postgres.render.com/taxease")
+DATABASES["default"] = dj_database_url.parse(config("DATABASE_URL"))
 
 
 # ── Password Validators ────────────────────────────────────────────────────────
