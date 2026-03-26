@@ -1,95 +1,60 @@
-# Frontend Developer Guide - TaxWise JWT Auth API
+# TaxEase Server - Frontend Developer Guide
 
-This document provides details on how to integrate with the backend JWT-based authentication system.
+This guide provides the necessary information to integrate your frontend application with the TaxEase Server backend. It covers authentication, intake, tax calculation, and payment initiation.
 
-## Base URL
-`http://localhost:8000/api/accounts/`
-
-## Authentication
-The system uses **JWT (JSON Web Tokens)**.
-1. **Login**: Send credentials to `/login/` to receive `access` and `refresh` tokens.
-2. **Authorized Requests**: Include the `access` token in the `Authorization` header:
-   `Authorization: Bearer <your_access_token>`
-3. **Token Refresh**: When the `access` token expires, send the `refresh` token to `/token/refresh/` to get a new `access` token.
+## Table of Contents
+1. [Base URL & Authentication](#1-base-url--authentication)
+2. [Accounts App](#2-accounts-app)
+3. [Smart Intake App](#3-smart-intake-app)
+4. [Tax Engine App](#4-tax-engine-app)
+5. [Payments App](#5-payments-app)
 
 ---
 
-### 1. User Registration
-**Endpoint:** `POST /register/`
+## 1. Base URL & Authentication
 
-**Request Body:**
+**Base URL:** `http://localhost:8000/api`
+
+### JWT Authentication Flow
+Most endpoints require a **Bearer Token**.
+1. **Login**: POST your credentials to `/accounts/login/` to receive an `access` and `refresh` token.
+2. **Authorize**: Include the access token in your headers: `Authorization: Bearer <your_access_token>`.
+3. **Refresh**: When the access token expires (usually 60 mins), POST the refresh token to `/accounts/token/refresh/` to get a new one.
+
+---
+
+## 2. Accounts App
+
+### Register User
+**Method:** `POST` | **URL:** `/accounts/register/` | **Auth:** None
+
+**Payload:**
 ```json
 {
     "email": "user@example.com",
-    "password": "yourpassword",
+    "password": "securepassword123",
     "first_name": "John",
     "last_name": "Doe",
-    "user_type": "individual" // Values: "individual", "sme", "corporate"
+    "user_type": "individual" // options: "individual", "sme", "corporate"
 }
 ```
 
----
+### Login
+**Method:** `POST` | **URL:** `/accounts/login/` | **Auth:** None
 
-### 2. User Login (Obtain Token)
-**Endpoint:** `POST /login/`
-
-**Request Body:**
+**Payload:**
 ```json
 {
     "email": "user@example.com",
-    "password": "yourpassword"
+    "password": "securepassword123"
 }
 ```
+**Response Details:** Returns `access`, `refresh`, and a `user` object with profile info.
 
-**Response (200 OK):**
-```json
-{
-    "refresh": "eyJhbG...",
-    "access": "eyJhbG...",
-    "user": {
-        "email": "user@example.com",
-        "first_name": "John",
-        "last_name": "Doe",
-        "user_type": "individual"
-    }
-}
-```
+### Get / Update Profile
+**Method:** `GET` / `PATCH` | **URL:** `/accounts/me/` | **Auth:** Bearer Token
 
----
-
-### 3. Token Refresh
-**Endpoint:** `POST /token/refresh/`
-
-**Request Body:**
-```json
-{
-    "refresh": "<your_refresh_token>"
-}
-```
-
-**Response (200 OK):**
-```json
-{
-    "access": "eyJhbG..."
-}
-```
-
----
-
-### 4. Fetch/Update Profile (Me)
-**Endpoint:** `GET /me/` or `PATCH /me/`
-
-**GET Response (200 OK):**
-```json
-{
-    "email": "user@example.com",
-    "first_name": "John",
-    "last_name": "Doe",
-    "user_type": "individual"
-}
-```
-
-**PATCH Request Body:**
+**PATCH Payload:** (All fields optional)
 ```json
 {
     "first_name": "Johnny",
@@ -99,28 +64,76 @@ The system uses **JWT (JSON Web Tokens)**.
 
 ---
 
-### 5. User Logout (Blacklist Token)
-**Endpoint:** `POST /logout/`
+## 3. Smart Intake App
 
-**Request Body:**
+### Submit Financial Intake
+**Method:** `POST` | **URL:** `/smart-intake/` | **Auth:** Bearer Token
+
+Accepts plain-English financial text. The AI extracts income and expenses to create a pending ledger entry.
+
+**Payload:**
 ```json
 {
-    "refresh": "<your_refresh_token>"
+    "raw_text": "I run a shop. My profit this week was ₦40,200 and I paid ₦15,000 rent.",
+    "source": "web" // options: "web", "voice", "api"
 }
 ```
 
-**Response (200 OK):**
-```json
-{
-    "message": "Successfully logged out."
-}
-```
+**Success Response (201):** Returns `ledger_id` and the `parsed` data extracted by AI.
+
 ---
 
-### 6. Role-Based Access
-The backend supports restricted access based on `user_type`. Certain endpoints may be restricted to:
-- `IsIndividual`: Only accessible by users with `user_type: "individual"`
-- `IsSME`: Only accessible by users with `user_type: "sme"`
-- `IsCorporate`: Only accessible by users with `user_type: "corporate"`
+## 4. Tax Engine App
 
-Ensure your frontend handles 403 Forbidden errors if a user tries to access a restricted resource.
+### Calculate Tax Owed
+**Method:** `GET` | **URL:** `/tax-engine/calculate/` | **Auth:** Bearer Token
+
+Triggers the 2026 Nigerian tax calculation pipeline for the authenticated user. No payload required.
+
+**Success Response (200):**
+```json
+{
+    "status": "success",
+    "breakdown": {
+        "gross_income": 4500000,
+        "deductions_applied": 500000,
+        "taxable_income": 4000000,
+        "final_tax_owed": 45000,
+        "platform_filing_fee": 1000
+    },
+    "message": "Pay ₦45,000 in tax plus ₦1,000 filing fee."
+}
+```
+
+---
+
+## 5. Payments App
+
+### Initiate Transaction
+**Method:** `POST` | **URL:** `/payments/initiate/` | **Auth:** Bearer Token
+
+Must be called **before** opening the Interswitch WebPay modal. This creates a pending record in our database.
+
+**Payload:**
+```json
+{
+    "tx_ref": "TAXEASE-usr_abc123-1711234567", // Unique frontend-generated ref
+    "amount": 1000.00,
+    "tax_year": 2026
+}
+```
+
+### Interswitch Webhook
+**Method:** `POST` | **URL:** `/payments/webhooks/interswitch/` | **Auth:** None
+
+This is for Interswitch's backend callback. If you are simulating a payment locally, use this endpoint.
+
+**Payload:**
+```json
+{
+    "txnref": "TAXEASE-usr_abc123-1711234567",
+    "amount": "100000", // Amount in Kobo (string)
+    "resp": "00", // "00" indicates success
+    "hash": "sha512hash..."
+}
+```

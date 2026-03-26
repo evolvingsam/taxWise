@@ -10,6 +10,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
 
     # App routes
+    path("api/accounts/",     include("apps.accounts.urls")),
     path("api/smart-intake/", include("apps.smart_intake.urls")),
     path("api/tax-engine/",   include("apps.tax_engine.urls")),
     path("api/payments/",     include("apps.payments.urls")),
