@@ -1,233 +1,392 @@
 {
 	"info": {
-		"_postman_id": "taxwise-jwt-auth-collection",
-		"name": "TaxWise JWT Auth API",
+		"_postman_id": "taxease-server-api-collection",
+		"name": "TaxEase Server API",
+		"description": "Comprehensive collection for testing all TaxEase Server apps: Accounts, Smart Intake, Tax Engine, and Payments.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "1. Register",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"dev@taxwise.com\",\n    \"password\": \"taxwise123\",\n    \"first_name\": \"Dev\",\n    \"last_name\": \"User\",\n    \"user_type\": \"individual\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/register/",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"register",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "2. Login (Obtain Tokens)",
-			"event": [
+			"name": "1. Accounts",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"var jsonData = pm.response.json();",
-							"pm.environment.set(\"access_token\", jsonData.access);",
-							"pm.environment.set(\"refresh_token\", jsonData.refresh);",
-							"pm.environment.set(\"user_email\", jsonData.user.email);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"email\": \"dev@taxwise.com\",\n    \"password\": \"taxwise123\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"taxpayer@example.com\",\n    \"password\": \"securepassword123\",\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"user_type\": \"individual\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/register/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"register",
+								""
+							]
 						}
-					}
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{base_url}}/login/",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"login",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "3. Get Profile (Me)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+				{
+					"name": "Login (Obtain JWT)",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"    pm.environment.set(\"refresh_token\", jsonData.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
 						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{base_url}}/me/",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"me",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "4. Update Profile (Me)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"taxpayer@example.com\",\n    \"password\": \"securepassword123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/login/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"login",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Access Token",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.environment.set(\"access_token\", jsonData.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
 						}
-					]
-				},
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"first_name\": \"Developer\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/me/",
-					"host": [
-						"{{base_url}}"
 					],
-					"path": [
-						"me",
-						""
-					]
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/token/refresh/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"token",
+								"refresh",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Authenticated User (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/accounts/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Profile (Me)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"first_name\": \"Johnny\",\n    \"last_name\": \"Dough\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/me/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"me",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout (Blacklist Refresh Token)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/accounts/logout/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"accounts",
+								"logout",
+								""
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "5. Token Refresh",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/token/refresh/",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"token",
-						"refresh",
-						""
-					]
+			"name": "2. Smart Intake",
+			"item": [
+				{
+					"name": "Submit Financial Intake",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"raw_text\": \"I run a shop. My profit this week was ₦40,200 and I paid ₦15,000 rent.\",\n    \"source\": \"web\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/smart-intake/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"smart-intake",
+								""
+							]
+						},
+						"description": "Accepts plain-English financial text. AI extracts income and expenses, saving a pending ledger entry."
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "6. Logout (Blacklist)",
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{access_token}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{base_url}}/logout/",
-					"host": [
-						"{{base_url}}"
-					],
-					"path": [
-						"logout",
-						""
-					]
+			"name": "3. Tax Engine",
+			"item": [
+				{
+					"name": "Calculate Tax Owed",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/tax-engine/calculate/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"tax-engine",
+								"calculate",
+								""
+							]
+						},
+						"description": "Triggers the 2026 Nigerian tax calculation pipeline for the authenticated user."
+					},
+					"response": []
 				}
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"exec": [
-					""
-				],
-				"type": "text/javascript"
-			}
+			]
 		},
 		{
-			"listen": "test",
-			"script": {
-				"exec": [
-					""
-				],
-				"type": "text/javascript"
-			}
+			"name": "4. Payments",
+			"item": [
+				{
+					"name": "Initiate Transaction",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tx_ref\": \"TAXEASE-usr_abc123-1711234567\",\n    \"amount\": 1000.00,\n    \"tax_year\": 2026\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/initiate/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"initiate",
+								""
+							]
+						},
+						"description": "Called before opening the Interswitch modal to create a pending record."
+					},
+					"response": []
+				},
+				{
+					"name": "Interswitch Webhook (Simulated)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"txnref\": \"TAXEASE-usr_abc123-1711234567\",\n    \"amount\": \"100000\",\n    \"resp\": \"00\",\n    \"hash\": \"a3f9...sha512hash...c82b\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/payments/webhooks/interswitch/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"payments",
+								"webhooks",
+								"interswitch",
+								""
+							]
+						},
+						"description": "Simulates the callback from Interswitch after a successful payment."
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8000/api/accounts",
+			"value": "http://localhost:8000/api",
 			"type": "string"
 		}
 	]
