@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { useAuth } from "@/lib/AuthContext";
 import toast from "react-hot-toast";
@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState<UserType | "">("");
   const [loading, setLoading] = useState(false);
 
@@ -97,15 +98,24 @@ export default function SignupPage() {
 
             <div className="space-y-2">
               <label htmlFor="password" className="block text-sm font-bold text-brand-dark uppercase tracking-wider">Password</label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -120,11 +130,10 @@ export default function SignupPage() {
                   return (
                     <label
                       key={option.id}
-                      className={`flex items-center gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
-                        checked
-                          ? "border-brand-gold bg-brand-gold/10"
-                          : "border-gray-200 bg-gray-50 hover:bg-white"
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all ${checked
+                        ? "border-brand-gold bg-brand-gold/10"
+                        : "border-gray-200 bg-gray-50 hover:bg-white"
+                        }`}
                     >
                       <input
                         type="checkbox"
