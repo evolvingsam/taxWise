@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { CreditCard, Wallet, Building2, CheckCircle2, Loader2, ShieldCheck, Lock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -49,7 +49,7 @@ const INTERSWITCH_TEST_CONFIG = {
   scriptUrl: "https://newwebpay.qa.interswitchng.com/inline-checkout.js",
 };
 
-export default function PaymentPage() {
+function PaymentContent() {
   const [status, setStatus] = useState<PaymentStatus>("selecting");
   const [method, setMethod] = useState<string>("card");
   const [isLoading, setIsLoading] = useState(false);
@@ -363,5 +363,13 @@ export default function PaymentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-brand-dark">Loading...</div>}>
+      <PaymentContent />
+    </Suspense>
   );
 }
