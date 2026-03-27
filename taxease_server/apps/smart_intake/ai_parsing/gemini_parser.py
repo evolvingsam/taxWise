@@ -47,16 +47,23 @@ class GeminiFinancialParser(BaseFinancialParser):
                     system_instruction=SYSTEM_PROMPT,
                     temperature=0.1,
                     max_output_tokens=300,
+                    response_mime_type="application/json",  
                 )
             )
 
             raw_json = response.text.strip()
 
             # Strip markdown fences if Gemini adds them
-            if raw_json.startswith("```"):
-                raw_json = raw_json.split("```")[1]
+            if "```" in raw_json:
+                # extract content between first and last ```
+                parts    = raw_json.split("```")
+                raw_json = parts[1] if len(parts) >= 2 else raw_json
+                # remove language identifier e.g. "json\n"
                 if raw_json.startswith("json"):
                     raw_json = raw_json[4:]
+                if raw_json.startswith("JSON"):
+                    raw_json = raw_json[4:]
+
             raw_json = raw_json.strip()
 
             logger.debug("Raw Gemini response: %s", raw_json)
@@ -70,6 +77,10 @@ class GeminiFinancialParser(BaseFinancialParser):
                 raw_text   = raw_text,
                 confidence = float(data.get("confidence", 0.5)),
             )
+
+         except json.JSONDecodeError as e:
+            logger.error("JSON decode failed. raw=%s error=%s", raw_json, str(e))
+            raise AIParsingError("AI returned an unparseable response.") from e
 
         except Exception as e:
             if "quota" in str(e).lower() or "unavailable" in str(e).lower():
