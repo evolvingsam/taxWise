@@ -283,7 +283,9 @@ export default function PaymentPage() {
             )}
 
             <Button
-              onClick={refreshTransactionStatus}
+              onClick={() => {
+                void refreshTransactionStatus();
+              }}
               disabled={isLoading || !txRef}
               className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-dark transition-all shadow-md"
             >
