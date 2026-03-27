@@ -55,7 +55,6 @@ class InitiatePaymentView(APIView):
                 name="Initiate filing fee payment",
                 request_only=True,
                 value={
-                    "tx_ref":   "TAXEASE-usr_abc123-1711234567",
                     "amount":   1000.00,
                     "tax_year": 2026,
                 },
@@ -75,8 +74,8 @@ class InitiatePaymentView(APIView):
         orchestrator = PaymentOrchestrator()
 
         try:
-            orchestrator.initiate_transaction(
-                user_id  = request.user.id,    
+            tx_ref = orchestrator.initiate_transaction(
+                user_id  = request.user.id,
                 amount   = data["amount"],
                 tax_year = data["tax_year"],
             )
