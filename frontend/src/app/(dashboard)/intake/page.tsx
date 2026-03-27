@@ -112,16 +112,6 @@ export default function SmartIntakePage() {
             <p className="text-xs text-muted-foreground mt-1">AI-Powered Financial Logging</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden">
-                <img src={`https://i.pravatar.cc/150?u=${i}`} alt="user" />
-              </div>
-            ))}
-          </div>
-          <span className="text-xs font-bold text-gray-400 ml-2 uppercase tracking-widest">+1.2k Active</span>
-        </div>
       </div>
 
       <div className="px-6 py-3 bg-amber-50 border-b border-amber-100 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
