@@ -7,7 +7,7 @@ from google.genai import types
 from django.conf import settings
 
 from .parser import BaseFinancialParser, ParsedFinancialData
-from .exceptions import AIParsingError, AIServiceUnavailableError
+from .exceptions import AIParsingError, AIServiceUnavailableError, NoFinancialDataError
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -146,24 +146,36 @@ class GeminiFinancialParser(BaseFinancialParser):
             extracted = response.parsed
 
             if extracted is not None:
-                expenses_dict = {item.category: item.amount for item in extracted.expenses}
+                # Guard against Gemini returning null fields when no financial data found
+                if not extracted.has_financial_data:
+                    self._validate_has_financial_data(
+                        has_financial_data = False,
+                        income             = 0.0,
+                        expenses           = {},
+                        confidence         = 0.0,
+                        raw_text           = raw_text,
+                    )
 
-                # ── Validate financial content ─────────────────────────────────
+                expenses_dict = {
+                    item.category: item.amount
+                    for item in (extracted.expenses or [])   # ← guard against None
+                }
+
                 self._validate_has_financial_data(
-                    has_financial_data = extracted.has_financial_data,
-                    income             = extracted.income,
+                    has_financial_data = extracted.has_financial_data or False,
+                    income             = extracted.income or 0.0,
                     expenses           = expenses_dict,
-                    confidence         = extracted.confidence,
+                    confidence         = extracted.confidence or 0.0,
                     raw_text           = raw_text,
                 )
 
                 return ParsedFinancialData(
-                    income     = extracted.income,
+                    income     = extracted.income or 0.0,
                     expenses   = expenses_dict,
-                    user_type  = extracted.user_type,
-                    period     = extracted.period,
+                    user_type  = extracted.user_type or "individual",
+                    period     = extracted.period or "monthly",
                     raw_text   = raw_text,
-                    confidence = extracted.confidence,
+                    confidence = extracted.confidence or 0.0,
                 )
 
             else:
