@@ -102,7 +102,7 @@ Body: multipart/form-data — audio file (mp3, wav, webm, m4a, ogg. Max 25MB)
 ```
 User records themselves describing their finances out loud. The voice pipeline runs in two stages:
 
-**Stage 1 — Transcription:** The audio file is sent to **OpenAI Whisper**, which transcribes it to text. The Whisper prompt is tuned for Nigerian financial terminology (Naira amounts, business income, rent, expenses).
+**Stage 1 — Transcription:** The audio file is sent to **Gemini Whisper**, which transcribes it to text. The Whisper prompt is tuned for Nigerian financial terminology (Naira amounts, business income, rent, expenses).
 
 **Stage 2 — Same pipeline as text:** The transcript is passed directly into the existing Gemini AI parsing pipeline. The result is identical to a text intake — a pending `IntakeLedgerEntry` saved to the database.
 
@@ -215,7 +215,7 @@ Frontend polls this endpoint and displays the RRR to the user. They use this cod
 | Backend Framework | Django 4.2 + Django REST Framework |
 | Authentication | SimpleJWT (JWT tokens) |
 | AI Parser | Google Gemini (`gemini-2.5-flash`) |
-| Voice Transcription | OpenAI Whisper (`whisper-1`) |
+| Voice Transcription | Gemini Whisper (`whisper-1`) |
 | Payment Gateway | Interswitch WebPay |
 | API Documentation | drf-spectacular (Swagger UI + ReDoc) |
 | Database (dev) | SQLite |
@@ -231,7 +231,6 @@ Frontend polls this endpoint and displays the RRR to the user. They use this cod
 - Python 3.12+
 - pip
 - A Gemini API key — free at https://aistudio.google.com/apikey
-- An OpenAI API key — for voice transcription at https://platform.openai.com
 
 ### Setup
 
@@ -282,7 +281,7 @@ GEMINI_API_KEY=your-gemini-api-key
 GEMINI_MODEL=gemini-2.5-flash
 
 # AI — Voice Transcription
-OPENAI_API_KEY=your-openai-api-key
+Gemini_API_KEY=your-Gemini-api-key
 
 # Payments
 INTERSWITCH_PRODUCT_ID=your-product-id
@@ -341,11 +340,11 @@ curl https://taxease-rpkq.onrender.com/api/tax/calculate/ \
 
 ---
 
-## 💡 The Aegis Score (Vision)
+## 💡 The WAEC Score (Vision)
 
-Every time a user files — even a zero-tax return — TaxEase records a verified financial event. Over time, this builds an **Aegis Score**: an alternative credit rating based on tax compliance rather than traditional banking history.
+Every time a user files — even a zero-tax return — TaxEase records a verified financial event. Over time, this builds an **WAEC Score**: an alternative credit rating based on tax compliance rather than traditional banking history.
 
-Partner banks and lenders can use the Aegis Score API to extend credit to the informal sector — turning tax filing into a wealth-building tool for the 80 million Nigerians currently excluded from formal finance.
+Partner banks and lenders can use the WAEC Score API to extend credit to the informal sector — turning tax filing into a wealth-building tool for the 80 million Nigerians currently excluded from formal finance.
 
 ---
 
@@ -365,6 +364,6 @@ Partner banks and lenders can use the Aegis Score API to extend credit to the in
 - The Interswitch integration runs in **sandbox mode** for this submission. All payment flows are fully functional end-to-end — only live bank settlement requires a production QTB merchant account.
 - The RRR (government payment reference) generation is a **mock implementation** of the Remita API. The format (`NRS-XXXX-XXXX`) and logic mirror the real integration.
 - AI parsing uses **Google Gemini** (`gemini-2.5-flash`) via the free tier. The `BaseFinancialParser` abstract interface means any AI provider (OpenAI, Anthropic, etc.) can be swapped in without touching the pipeline.
-- Voice transcription uses **OpenAI Whisper** (`whisper-1`). The `BaseTranscriber` abstract interface means any transcription provider can be swapped in without touching the pipeline.
+- Voice transcription uses **Google Gemini** (`gemini-2.5-flash`). The `BaseTranscriber` abstract interface means any transcription provider can be swapped in without touching the pipeline.
 - Both text and voice intake include **financial content validation** — random or irrelevant input is rejected before anything is saved to the database.
 - All endpoints are testable live via the Swagger UI linked above.
