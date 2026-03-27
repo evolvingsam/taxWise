@@ -9,12 +9,10 @@ TaxEase replaces 20-page tax forms with a conversational AI interface. A market 
 ## 🔗 Important Links
 
 | Resource | URL |
-|---|---|
-| **Live API (Backend)** | https://taxease-rpkq.onrender.com |
+| **LIVE URL** |[ _https://taxwise-mu.vercel.app/) |
+|---|---|taxrpkq.onrender.com |
 | **Swagger UI (Interactive Docs)** | https://taxease-rpkq.onrender.com/api/docs/ |
 | **ReDoc (Reference Docs)** | https://taxease-rpkq.onrender.com/api/redoc/ |
-| **Frontend Repository** | _(add your frontend repo link here)_ |
-| **Backend Repository** | _(add your backend repo link here)_ |
 
 ---
 
