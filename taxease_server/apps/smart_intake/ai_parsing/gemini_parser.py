@@ -1,4 +1,5 @@
-import json
+from pydantic import BaseModel, Field
+from typing import Dict, Literal
 from google import genai
 from google.genai import types
 from django.conf import settings
@@ -9,32 +10,39 @@ from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+class FinancialExtractionSchema(BaseModel):
+    income: float = Field(
+        default=0.0, 
+        description="Total income in Nigerian Naira (NGN)."
+    )
+    expenses: Dict[str, float] = Field(
+        default_factory=dict, 
+        description="Dictionary of expense categories as keys and amounts as values in NGN."
+    )
+    user_type: Literal["individual", "sme", "corporate"] = Field(
+        default="individual",
+        description="The type of entity. Default to individual if unclear."
+    )
+    period: Literal["weekly", "monthly", "annual"] = Field(
+        default="monthly",
+        description="The time period for the financials. Default to monthly if unstated."
+    )
+    confidence: float = Field(
+        default=0.5,
+        ge=0.0, le=1.0, 
+        description="Confidence score of the extraction between 0 and 1."
+    )
+
 SYSTEM_PROMPT = """
 You are a Nigerian tax intake assistant. Extract financial data from the
-user's plain-English description and return ONLY a valid JSON object with
-this exact schema:
-
-{
-  "income": <float>,
-  "expenses": { "<category>": <float> },
-  "user_type": "<individual|sme|corporate>",
-  "period": "<weekly|monthly|annual>",
-  "confidence": <float between 0 and 1>
-}
-
-Rules:
-- All monetary values in Nigerian Naira (NGN).
-- If the period is not stated, default to "monthly".
-- If user_type is unclear, default to "individual".
-- Return ONLY the JSON. No prose, no markdown, no explanation.
+user's plain-English description. All monetary values must be interpreted as Nigerian Naira (NGN).
 """
-
 
 class GeminiFinancialParser(BaseFinancialParser):
 
     def __init__(self):
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.0-flash")
+        self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
 
     def parse(self, raw_text: str) -> ParsedFinancialData:
         logger.info("Sending text to Gemini (google-genai). length=%d", len(raw_text))
@@ -47,40 +55,28 @@ class GeminiFinancialParser(BaseFinancialParser):
                     system_instruction=SYSTEM_PROMPT,
                     temperature=0.1,
                     max_output_tokens=300,
-                    response_mime_type="application/json",  
+                    response_mime_type="application/json",
+                    response_schema=FinancialExtractionSchema,
                 )
             )
 
-            raw_json = response.text.strip()
+            if not response.text:
+                logger.error(f"Gemini returned an empty response. Raw: {response}")
+                raise AIParsingError("AI returned an empty response (possibly blocked by safety filters).")
 
-            # Strip markdown fences if Gemini adds them
-            if "```" in raw_json:
-                # extract content between first and last ```
-                parts    = raw_json.split("```")
-                raw_json = parts[1] if len(parts) >= 2 else raw_json
-                # remove language identifier e.g. "json\n"
-                if raw_json.startswith("json"):
-                    raw_json = raw_json[4:]
-                if raw_json.startswith("JSON"):
-                    raw_json = raw_json[4:]
+            
+            extracted: FinancialExtractionSchema = response.parsed
 
-            raw_json = raw_json.strip()
-
-            logger.debug("Raw Gemini response: %s", raw_json)
-            data = json.loads(raw_json)
+            logger.debug("Successfully parsed Gemini response: %s", extracted.model_dump_json())
 
             return ParsedFinancialData(
-                income     = float(data.get("income", 0.0)),
-                expenses   = data.get("expenses", {}),
-                user_type  = data.get("user_type", "individual"),
-                period     = data.get("period", "monthly"),
+                income     = extracted.income,
+                expenses   = extracted.expenses,
+                user_type  = extracted.user_type,
+                period     = extracted.period,
                 raw_text   = raw_text,
-                confidence = float(data.get("confidence", 0.5)),
+                confidence = extracted.confidence,
             )
-
-        except json.JSONDecodeError as e:
-            logger.error("JSON decode failed. raw=%s error=%s", raw_json, str(e))
-            raise AIParsingError("AI returned an unparseable response.") from e
 
         except Exception as e:
             if "quota" in str(e).lower() or "unavailable" in str(e).lower():
