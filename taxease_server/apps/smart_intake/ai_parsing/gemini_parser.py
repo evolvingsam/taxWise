@@ -10,12 +10,12 @@ from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-# 1. Create a strict schema for a single expense item
+# ─── PYDANTIC SCHEMAS ─────────────────────────────────────────────────────────
+
 class ExpenseItem(BaseModel):
     category: str = Field(description="The category of the expense (e.g., rent, food, transport, marketing).")
     amount: float = Field(description="The amount spent in NGN.")
 
-# 2. Update the main schema to use a List of ExpenseItems
 class FinancialExtractionSchema(BaseModel):
     income: float = Field(
         default=0.0, 
@@ -39,15 +39,22 @@ class FinancialExtractionSchema(BaseModel):
         description="Confidence score of the extraction between 0.0 and 1.0."
     )
 
+
+# ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
+
 SYSTEM_PROMPT = """
 You are a Nigerian tax intake assistant. Extract financial data from the
 user's plain-English description. All monetary values must be interpreted as Nigerian Naira (NGN).
 """
 
+
+# ─── PARSER CLASS ─────────────────────────────────────────────────────────────
+
 class GeminiFinancialParser(BaseFinancialParser):
 
     def __init__(self):
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        # Defaulting to the stable 2026 model
         self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
 
     def parse(self, raw_text: str) -> ParsedFinancialData:
@@ -63,24 +70,50 @@ class GeminiFinancialParser(BaseFinancialParser):
                     max_output_tokens=300,
                     response_mime_type="application/json",
                     response_schema=FinancialExtractionSchema,
+                    
+                    # Lowered safety thresholds to prevent silent blocks on financial terms
+                    safety_settings=[
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                            threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                            threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_ONLY_HIGH,
+                        ),
+                    ]
                 )
             )
 
+            # Check if Gemini blocked the output despite the lowered thresholds
             if not response.text:
-                logger.error(f"Gemini returned an empty response. Raw: {response}")
+                if response.candidates and response.candidates[0].finish_reason:
+                    reason = response.candidates[0].finish_reason
+                    logger.error(f"Gemini blocked generation. Reason: {reason}")
+                else:
+                    logger.error(f"Gemini returned an empty response. Raw: {response}")
+                
                 raise AIParsingError("AI returned an empty response (possibly blocked by safety filters).")
 
+            # The SDK automatically parses the JSON into our Pydantic model
             extracted: FinancialExtractionSchema = response.parsed
 
-            # 3. Convert the list of ExpenseItems back into a standard dictionary
-            # e.g., turns [{"category": "rent", "amount": 500}] into {"rent": 500.0}
+            # Convert the list of ExpenseItems back into a standard dictionary for your app
             expenses_dict = {item.category: item.amount for item in extracted.expenses}
 
             logger.debug("Successfully parsed Gemini response.")
 
             return ParsedFinancialData(
                 income     = extracted.income,
-                expenses   = expenses_dict,  # Pass the converted dictionary here
+                expenses   = expenses_dict,
                 user_type  = extracted.user_type,
                 period     = extracted.period,
                 raw_text   = raw_text,
