@@ -22,7 +22,6 @@ export default function MarketingLayout({
 
           <nav className="hidden lg:flex items-center gap-10 text-[13px] font-bold uppercase tracking-wider text-gray-600">
             <Link href="/" className="hover:text-brand-dark transition-colors">Home</Link>
-            <Link href="/aegis-vision" className="hover:text-brand-dark transition-colors">Aegis Score</Link>
             <Link href="/compliance" className="hover:text-brand-dark transition-colors">2026 Reforms</Link>
           </nav>
 
@@ -58,14 +57,12 @@ export default function MarketingLayout({
               <h4 className="font-bold text-sm uppercase tracking-widest mb-6">Our Services</h4>
               <ul className="space-y-4 text-sm text-gray-400">
                 <li><Link href="/compliance" className="hover:text-brand-gold">Compliance Review</Link></li>
-                <li><Link href="/aegis-vision" className="hover:text-brand-gold">Aegis Scoring</Link></li>
                 <li><Link href="/coming-soon" className="hover:text-brand-gold">Pay-As-You-Earn</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-bold text-sm uppercase tracking-widest mb-6">Quick Links</h4>
               <ul className="space-y-4 text-sm text-gray-400">
-                <li><Link href="/aegis-vision" className="hover:text-brand-gold">The Vision</Link></li>
                 <li><Link href="/coming-soon" className="hover:text-brand-gold">Contact Us</Link></li>
                 <li><Link href="/login" className="hover:text-brand-gold">Client Portal</Link></li>
                 <li><Link href="/coming-soon" className="hover:text-brand-gold">Privacy Policy</Link></li>

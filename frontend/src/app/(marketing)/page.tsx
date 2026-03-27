@@ -25,6 +25,7 @@ export default function LandingPage() {
 
             <p className="max-w-2xl text-xl md:text-2xl text-gray-400 font-medium mx-auto leading-relaxed">
               Replacing 20-page forms with a conversational AI interface. The intelligent platform for every Nigerian freelancer, artisan, and executive.
+              Log your finances and use this at the end of the month to easily calculate your tax.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-6 pt-4 justify-center">
@@ -33,12 +34,6 @@ export default function LandingPage() {
                 className="group bg-brand-dark text-white px-12 py-5 rounded-2xl font-bold uppercase tracking-widest text-sm hover:bg-brand-gold hover:text-brand-dark transition-all shadow-md flex items-center gap-3"
               >
                 Start Free Assessment <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="/aegis-vision"
-                className="bg-white text-brand-dark border-2 border-brand-dark/5 px-12 py-5 rounded-2xl font-bold uppercase tracking-widest text-sm hover:border-brand-dark transition-all"
-              >
-                View The Vision
               </Link>
             </div>
           </div>
@@ -162,16 +157,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            {/* Feature 3 */}
-            <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm border border-gray-100 hover:shadow-md transition-all duration-500 group animate-fade-in-up opacity-0 [animation-delay:600ms]">
-              <div className="w-20 h-20 rounded-3xl bg-brand-dark text-brand-gold flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
-                <BarChart3 className="w-10 h-10" />
-              </div>
-              <h3 className="text-2xl font-black font-space tracking-tight mb-4">Aegis Score</h3>
-              <p className="text-gray-500 leading-relaxed text-sm">
-                Turn your tax history into a credit rating. Partner banks use your Aegis Score to offer loans, bridging the gap between you and the formal economy.
-              </p>
-            </div>
+
           </div>
         </div>
       </section>

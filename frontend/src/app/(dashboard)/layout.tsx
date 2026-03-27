@@ -93,26 +93,10 @@ export default function DashboardLayout({
                 </div>
                 Settings
               </Link>
-              <Link
-                href="/qa"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
-                  <FlaskConical className="h-4 w-4" />
-                </div>
-                API QA
-              </Link>
+
             </div>
 
-            <div className="mt-auto mb-8 p-6 rounded-3xl bg-brand-dark text-white relative overflow-hidden">
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-brand-gold/10 rounded-full blur-xl"></div>
-              <ShieldCheck className="w-8 h-8 text-brand-gold mb-4" />
-              <h5 className="font-bold mb-2">Aegis Score</h5>
-              <p className="text-[10px] text-gray-400 leading-relaxed mb-4">You are 15 points away from unlocking &quot;Elite&quot; status for low-interest loans.</p>
-              <div className="w-full bg-white/10 h-1 rounded-full overflow-hidden">
-                <div className="bg-brand-gold h-full w-[85%]"></div>
-              </div>
-            </div>
+
           </div>
         </aside>
         <main className="flex w-full flex-col overflow-hidden pb-24 md:pb-0">
@@ -138,10 +122,7 @@ export default function DashboardLayout({
           <Settings className="h-5 w-5 mb-1" />
           <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
         </Link>
-        <Link href="/qa" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
-          <FlaskConical className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">QA</span>
-        </Link>
+
       </nav>
     </div>
   );

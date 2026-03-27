@@ -87,34 +87,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Aegis Score Card - Feature 3: The Innovation */}
-        <div className="rounded-[2.5rem] bg-brand-dark text-white p-8 flex flex-col justify-between shadow-md relative overflow-hidden group animate-fade-in-up [animation-delay:300ms] opacity-0">
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-brand-gold/5 rounded-full blur-3xl group-hover:bg-brand-gold/10 transition-all duration-700"></div>
-          <div className="relative z-10 flex items-center justify-between">
-            <h3 className="text-xs font-bold uppercase tracking-widest text-brand-gold flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4" /> Aegis Score
-            </h3>
-            <span className="text-[10px] bg-white/10 text-brand-gold px-2 py-1 rounded-full font-bold">ALPHA VERSION</span>
-          </div>
-          
-          <div className="relative z-10 mt-6 flex items-baseline gap-2">
-            <div className="font-space text-6xl font-black">842</div>
-            <div className="text-gray-400 font-bold">/ 900</div>
-          </div>
-          
-          <div className="relative z-10 mt-6 space-y-4">
-            <div className="flex items-center justify-between text-xs font-bold">
-              <span className="text-gray-400 uppercase tracking-widest">Tax Compliance Level</span>
-              <span className="text-brand-gold">EXCELLENT</span>
-            </div>
-            <div className="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-              <div className="bg-brand-gold h-full w-[85%] rounded-full shadow-[0_0_15px_#FBB03B]"></div>
-            </div>
-            <p className="text-[10px] text-gray-400 leading-relaxed italic">
-              &quot;Your verified tax history has unlocked a ₦2.5M credit limit at partner banks.&quot;
-            </p>
-          </div>
-        </div>
+
 
         {/* Tax Liability Card - Feature 2: Universal Tax Engine */}
         <div className="rounded-[2.5rem] border bg-white p-8 flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow animate-fade-in-up [animation-delay:400ms] opacity-0">
