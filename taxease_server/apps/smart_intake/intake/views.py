@@ -22,7 +22,7 @@ from ..pipeline.orchestrator import IntakePipelineOrchestrator
 from ..persistence.repository import IntakeRepository
 from ..utils.logging import get_logger
 
-from ..voice.transcriber import WhisperTranscriber
+from ..voice.transcriber import GeminiAudioTranscriber
 from ..voice.exceptions import (
     TranscriptionError,
     AudioValidationError,
@@ -279,7 +279,7 @@ class VoiceIntakeView(APIView):
         source     = serializer.validated_data.get("source", "voice")
 
         # ── Stage 1: Transcribe audio → text ──────────────────────────────────
-        transcriber = WhisperTranscriber()
+        transcriber = GeminiAudioTranscriber()
 
         try:
             transcript = transcriber.transcribe(audio_file)
