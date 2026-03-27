@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { Home, FileText, History, Bell, Search, ShieldCheck, Settings, FlaskConical } from "lucide-react";
+
+import { usePathname } from "next/navigation";
+import { Home, FileText, History, Bell, Search, Settings } from "lucide-react";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
 import { useAuth } from "@/lib/AuthContext";
+
+const NAV_ITEMS = [
+  { href: "/dashboard", label: "Overview", icon: Home },
+  { href: "/intake", label: "Smart Intake", icon: FileText },
+  { href: "/history", label: "Ledger History", icon: History },
+  { href: "/settings", label: "Settings", icon: Settings },
+];
 
 export default function DashboardLayout({
   children,
@@ -11,6 +20,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user } = useAuth();
+  const pathname = usePathname();
   const initials = `${user?.first_name?.[0] || "U"}${user?.last_name?.[0] || "S"}`.toUpperCase();
 
   return (
@@ -57,43 +67,29 @@ export default function DashboardLayout({
         <aside className="fixed top-24 z-30 -ml-2 hidden h-[calc(100vh-8rem)] w-full shrink-0 md:sticky md:block">
           <div className="h-full pr-6 border-r border-gray-100 text-sm flex flex-col">
             <div className="space-y-1">
-              <Link
-                href="/dashboard"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-brand-dark bg-white shadow-sm border border-gray-100 font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-brand-dark text-brand-gold flex items-center justify-center mr-3 group-hover:scale-110 transition-transform">
-                  <Home className="h-4 w-4" />
-                </div>
-                Overview
-              </Link>
-              <Link
-                href="/intake"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
-                  <FileText className="h-4 w-4" />
-                </div>
-                Smart Intake
-              </Link>
-              <Link
-                href="/history"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
-                  <History className="h-4 w-4" />
-                </div>
-                Ledger History
-              </Link>
-              <Link
-                href="/settings"
-                className="group flex w-full items-center rounded-2xl px-4 py-3 text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100 transition-all font-bold mb-2"
-              >
-                <div className="w-8 h-8 rounded-lg bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark flex items-center justify-center mr-3 transition-colors">
-                  <Settings className="h-4 w-4" />
-                </div>
-                Settings
-              </Link>
-
+              {NAV_ITEMS.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`group flex w-full items-center rounded-2xl px-4 py-3 font-bold mb-2 transition-all ${
+                      isActive
+                        ? "text-brand-dark bg-white shadow-sm border border-gray-100"
+                        : "text-gray-400 hover:text-brand-dark hover:bg-white hover:shadow-sm hover:border-gray-100"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center mr-3 transition-colors ${
+                      isActive
+                        ? "bg-brand-dark text-brand-gold group-hover:scale-110 transition-transform"
+                        : "bg-gray-100 text-gray-400 group-hover:bg-brand-gold group-hover:text-brand-dark"
+                    }`}>
+                      <item.icon className="h-4 w-4" />
+                    </div>
+                    {item.label}
+                  </Link>
+                );
+              })}
             </div>
 
 
@@ -106,23 +102,15 @@ export default function DashboardLayout({
 
       {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around bg-white/95 backdrop-blur-md border-t border-gray-100 p-4 md:hidden pb-safe">
-        <Link href="/dashboard" className="flex flex-col items-center text-brand-dark">
-          <Home className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Home</span>
-        </Link>
-        <Link href="/intake" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
-          <FileText className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Intake</span>
-        </Link>
-        <Link href="/history" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
-          <History className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">History</span>
-        </Link>
-        <Link href="/settings" className="flex flex-col items-center text-gray-400 hover:text-brand-dark transition-colors">
-          <Settings className="h-5 w-5 mb-1" />
-          <span className="text-[10px] font-bold uppercase tracking-widest">Settings</span>
-        </Link>
-
+        {NAV_ITEMS.map((item) => {
+          const isActive = pathname === item.href;
+          return (
+            <Link key={item.href} href={item.href} className={`flex flex-col items-center transition-colors ${isActive ? "text-brand-dark" : "text-gray-400 hover:text-brand-dark"}`}>
+              <item.icon className="h-5 w-5 mb-1" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </div>
   );

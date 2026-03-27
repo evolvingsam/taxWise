@@ -115,28 +115,7 @@ export default function SmartIntakePage() {
       </div>
 
       <div className="px-6 py-3 bg-amber-50 border-b border-amber-100 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
-        <p className="text-xs text-amber-800 font-semibold">
-          Source value is required by backend. Current source: <span className="uppercase">{source}</span>
-        </p>
-        <div className="flex gap-2">
-          {[
-            { id: "web", label: "Web" },
-            { id: "mobile", label: "Mobile" },
-            { id: "voice", label: "Voice" },
-          ].map((option) => (
-            <button
-              key={option.id}
-              onClick={() => setSource(option.id)}
-              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
-                source === option.id
-                  ? "bg-brand-dark text-brand-gold border-brand-dark"
-                  : "bg-white text-gray-600 border-gray-200"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+
       </div>
 
       {/* Chat Area */}
