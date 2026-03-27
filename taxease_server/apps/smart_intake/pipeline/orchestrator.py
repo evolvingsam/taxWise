@@ -3,8 +3,8 @@ from typing import Optional
 
 from ..intake.validators import RawIntakePayload
 from ..ai_parsing.gemini_parser import GeminiFinancialParser
+from ..ai_parsing.exceptions import AIParsingError, AIServiceUnavailableError, NoFinancialDataError
 from ..ai_parsing.parser import ParsedFinancialData
-from ..ai_parsing.exceptions import AIParsingError, AIServiceUnavailableError
 from ..ledger.writer import LedgerWriter
 from ..utils.logging import get_logger
 
@@ -44,16 +44,26 @@ class IntakePipelineOrchestrator:
     def run(self, payload: RawIntakePayload) -> PipelineResult:
         logger.info("Pipeline started. user_id=%s source=%s", payload.user_id, payload.source)
 
+
         # ── Stage 1: AI Parsing ────────────────────────────────────────────────
         try:
             parsed = self.parser.parse(payload.raw_text)
             logger.info("AI parsing succeeded. confidence=%.2f", parsed.confidence)
+
         except AIServiceUnavailableError as e:
             logger.error("AI service unavailable: %s", str(e))
             return PipelineResult(
                 success=False,
                 error="AI service temporarily unavailable. Please try again shortly.",
             )
+
+        except NoFinancialDataError as e:           # ← new
+            logger.warning("No financial data in input: %s", str(e))
+            return PipelineResult(
+                success=False,
+                error=str(e),                       # friendly message goes to user
+            )
+
         except AIParsingError as e:
             logger.error("AI parsing failed: %s", str(e))
             return PipelineResult(

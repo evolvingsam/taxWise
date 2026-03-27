@@ -40,6 +40,14 @@ class FinancialExtractionSchema(BaseModel):
         ge=0.0, le=1.0, 
         description="Confidence score of the extraction between 0.0 and 1.0."
     )
+    has_financial_data: bool = Field(       # ← new field
+        default=False,
+        description=(
+            "Set to true ONLY if the text contains actual financial information "
+            "such as income, revenue, profit, sales, or expenses. "
+            "Set to false if the text is random, irrelevant, or contains no financial data."
+        )
+    )
 
 
 # ─── SYSTEM PROMPT ────────────────────────────────────────────────────────────
@@ -48,9 +56,11 @@ SYSTEM_PROMPT = """
 You are a Nigerian tax intake assistant. Extract financial data from the
 user's plain-English description. All monetary values must be interpreted as Nigerian Naira (NGN).
 
-CRITICAL INSTRUCTION: Return ONLY the raw JSON object. Do not include any conversational text like "Here is the JSON", and do not use Markdown formatting (e.g., ```json). Your response must begin with { and end with }.
+IMPORTANT: Set has_financial_data to true ONLY if the text contains real financial 
+information such as income, profit, revenue, sales, or expenses.
+If the text is random, a greeting, irrelevant, or contains no financial data at all,
+set has_financial_data to false and leave all other fields at their defaults.
 """
-
 
 # ─── PARSER CLASS ─────────────────────────────────────────────────────────────
 
@@ -58,9 +68,36 @@ class GeminiFinancialParser(BaseFinancialParser):
 
     def __init__(self):
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
-        # Defaulting to the stable model. 
-        # NOTE: Ensure your .env file does not override this with a 404 model!
+        
         self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
+    
+    def _validate_has_financial_data(
+        self,
+        has_financial_data: bool,
+        income: float,
+        expenses: dict,
+        confidence: float,
+        raw_text: str,
+    ):
+        """
+        Rejects intake if the AI determined there is no financial data,
+        or if the extracted values are all zero with very low confidence.
+        """
+        no_data_flag    = not has_financial_data
+        no_income       = income == 0.0
+        no_expenses     = len(expenses) == 0
+        low_confidence  = confidence < 0.3
+
+        if no_data_flag or (no_income and no_expenses and low_confidence):
+            logger.warning(
+                "No financial data detected. has_financial_data=%s income=%.2f "
+                "expenses=%s confidence=%.2f raw_text='%s'",
+                has_financial_data, income, expenses, confidence, raw_text[:80],
+            )
+            raise NoFinancialDataError(
+                "No financial information found in your input. "
+                "Please describe your income or expenses."
+            )
 
     def parse(self, raw_text: str) -> ParsedFinancialData:
         logger.info("Sending text to Gemini (google-genai). length=%d", len(raw_text))
@@ -75,8 +112,6 @@ class GeminiFinancialParser(BaseFinancialParser):
                     max_output_tokens=300,
                     response_mime_type="application/json",
                     response_schema=FinancialExtractionSchema,
-                    
-                    # Lowered safety thresholds to prevent silent blocks on financial terms
                     safety_settings=[
                         types.SafetySetting(
                             category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -98,40 +133,73 @@ class GeminiFinancialParser(BaseFinancialParser):
                 )
             )
 
-            # Check if Gemini blocked the output despite the lowered thresholds
             if not response.text:
                 if response.candidates and response.candidates[0].finish_reason:
                     reason = response.candidates[0].finish_reason
-                    logger.error(f"Gemini blocked generation. Reason: {reason}")
+                    logger.error("Gemini blocked generation. Reason: %s", reason)
                 else:
-                    logger.error(f"Gemini returned an empty response. Raw: {response}")
-                
-                raise AIParsingError("AI returned an empty response (possibly blocked by safety filters).")
+                    logger.error("Gemini returned empty response. Raw: %s", response)
+                raise AIParsingError("AI returned an empty response.")
 
-            # Access the parsed Pydantic object
+            logger.debug("Raw Gemini response text: %s", response.text)
+
             extracted = response.parsed
 
-            # Fallback manual parse if Pydantic rejected the JSON due to strict formatting issues
-            if not extracted:
+            if extracted is not None:
+                expenses_dict = {item.category: item.amount for item in extracted.expenses}
+
+                # ── Validate financial content ─────────────────────────────────
+                self._validate_has_financial_data(
+                    has_financial_data = extracted.has_financial_data,
+                    income             = extracted.income,
+                    expenses           = expenses_dict,
+                    confidence         = extracted.confidence,
+                    raw_text           = raw_text,
+                )
+
+                return ParsedFinancialData(
+                    income     = extracted.income,
+                    expenses   = expenses_dict,
+                    user_type  = extracted.user_type,
+                    period     = extracted.period,
+                    raw_text   = raw_text,
+                    confidence = extracted.confidence,
+                )
+
+            else:
                 logger.warning("response.parsed was None. Falling back to manual JSON parse.")
-                raw_response = response.text
-                
-                # Use regex to extract only the JSON payload between brackets
-                match = re.search(r'(\{.*\})', raw_response, re.DOTALL)
-                
-                if not match:
-                    logger.error(f"Failed to find JSON block in: {raw_response}")
-                    raise AIParsingError("AI returned an unparseable response.")
-                
-                data = json.loads(match.group(1))
-                safe_expenses = data.get("expenses") or []
-                
-                # Safely map the fallback dict
-                expenses_dict = {}
-                for item in safe_expenses:
-                    if isinstance(item, dict):
-                        expenses_dict[item.get("category", "")] = item.get("amount", 0.0)
-                
+                import json
+
+                raw_json = response.text.strip()
+                if "```" in raw_json:
+                    parts    = raw_json.split("```")
+                    raw_json = parts[1] if len(parts) >= 2 else raw_json
+                    if raw_json.lower().startswith("json"):
+                        raw_json = raw_json[4:]
+                raw_json = raw_json.strip()
+
+                data = json.loads(raw_json)
+
+                raw_expenses = data.get("expenses", {})
+                if isinstance(raw_expenses, list):
+                    expenses_dict = {
+                        item.get("category", "other"): float(item.get("amount", 0))
+                        for item in raw_expenses
+                    }
+                elif isinstance(raw_expenses, dict):
+                    expenses_dict = {k: float(v) for k, v in raw_expenses.items()}
+                else:
+                    expenses_dict = {}
+
+                # ── Validate financial content ─────────────────────────────────
+                self._validate_has_financial_data(
+                    has_financial_data = data.get("has_financial_data", False),
+                    income             = float(data.get("income", 0.0)),
+                    expenses           = expenses_dict,
+                    confidence         = float(data.get("confidence", 0.5)),
+                    raw_text           = raw_text,
+                )
+
                 return ParsedFinancialData(
                     income     = float(data.get("income", 0.0)),
                     expenses   = expenses_dict,
@@ -141,33 +209,12 @@ class GeminiFinancialParser(BaseFinancialParser):
                     confidence = float(data.get("confidence", 0.5)),
                 )
 
-            # ── If Pydantic parsing succeeded ──
-            
-            # Safely handle if the AI returned null instead of an empty list
-            safe_expenses = extracted.expenses if extracted.expenses is not None else []
-            
-            # Convert the list of ExpenseItems back into a standard dictionary for your app
-            expenses_dict = {item.category: item.amount for item in safe_expenses}
-
-            logger.debug("Successfully parsed Gemini response.")
-
-            return ParsedFinancialData(
-                income     = extracted.income or 0.0,
-                expenses   = expenses_dict,
-                user_type  = extracted.user_type or "individual",
-                period     = extracted.period or "monthly",
-                raw_text   = raw_text,
-                confidence = extracted.confidence or 0.5,
-            )
-
-        except json.JSONDecodeError as e:
-            logger.error(f"Manual JSON decode failed: {str(e)}")
-            raise AIParsingError("AI returned an unparseable response.") from e
+        except (AIParsingError, AIServiceUnavailableError, NoFinancialDataError):
+            raise   # let these bubble up cleanly
 
         except Exception as e:
-            if "quota" in str(e).lower() or "unavailable" in str(e).lower():
+            if "quota" in str(e).lower() or "unavailable" in str(e).lower() or "429" in str(e):
                 logger.error("Gemini service unavailable: %s", str(e))
                 raise AIServiceUnavailableError("AI service is currently unavailable.") from e
-
             logger.error("Gemini parsing failed: %s", str(e))
             raise AIParsingError("AI returned an unparseable response.") from e

@@ -5,3 +5,7 @@ class AIParsingError(Exception):
 class AIServiceUnavailableError(AIParsingError):
     """Raised when the AI API is unreachable."""
     pass
+
+class NoFinancialDataError(AIParsingError):      
+    """Raised when the input contains no financial information."""
+    pass
