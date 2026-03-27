@@ -56,7 +56,7 @@ class GeminiFinancialParser(BaseFinancialParser):
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         # Defaulting to the stable 2026 model
         self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.5-flash")
-
+        
     def parse(self, raw_text: str) -> ParsedFinancialData:
         logger.info("Sending text to Gemini (google-genai). length=%d", len(raw_text))
 
@@ -70,8 +70,6 @@ class GeminiFinancialParser(BaseFinancialParser):
                     max_output_tokens=300,
                     response_mime_type="application/json",
                     response_schema=FinancialExtractionSchema,
-                    
-                    # Lowered safety thresholds to prevent silent blocks on financial terms
                     safety_settings=[
                         types.SafetySetting(
                             category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -93,35 +91,79 @@ class GeminiFinancialParser(BaseFinancialParser):
                 )
             )
 
-            # Check if Gemini blocked the output despite the lowered thresholds
+            # ── Check for empty/blocked response ──────────────────────────────────
             if not response.text:
                 if response.candidates and response.candidates[0].finish_reason:
                     reason = response.candidates[0].finish_reason
-                    logger.error(f"Gemini blocked generation. Reason: {reason}")
+                    logger.error("Gemini blocked generation. Reason: %s", reason)
                 else:
-                    logger.error(f"Gemini returned an empty response. Raw: {response}")
-                
-                raise AIParsingError("AI returned an empty response (possibly blocked by safety filters).")
+                    logger.error("Gemini returned empty response. Raw: %s", response)
+                raise AIParsingError("AI returned an empty response.")
 
-            # The SDK automatically parses the JSON into our Pydantic model
-            extracted: FinancialExtractionSchema = response.parsed
+            logger.debug("Raw Gemini response text: %s", response.text)
 
-            # Convert the list of ExpenseItems back into a standard dictionary for your app
-            expenses_dict = {item.category: item.amount for item in extracted.expenses}
+            # ── Try response.parsed first, fall back to manual JSON parse ─────────
+            extracted = response.parsed
 
-            logger.debug("Successfully parsed Gemini response.")
+            if extracted is not None:
+                # SDK successfully mapped to Pydantic model
+                expenses_dict = {item.category: item.amount for item in extracted.expenses}
 
-            return ParsedFinancialData(
-                income     = extracted.income,
-                expenses   = expenses_dict,
-                user_type  = extracted.user_type,
-                period     = extracted.period,
-                raw_text   = raw_text,
-                confidence = extracted.confidence,
-            )
+                return ParsedFinancialData(
+                    income     = extracted.income,
+                    expenses   = expenses_dict,
+                    user_type  = extracted.user_type,
+                    period     = extracted.period,
+                    raw_text   = raw_text,
+                    confidence = extracted.confidence,
+                )
+
+            else:
+                # response.parsed is None — manually parse response.text
+                logger.warning("response.parsed was None. Falling back to manual JSON parse.")
+                import json
+
+                raw_json = response.text.strip()
+
+                # Strip markdown fences if present
+                if "```" in raw_json:
+                    parts    = raw_json.split("```")
+                    raw_json = parts[1] if len(parts) >= 2 else raw_json
+                    if raw_json.lower().startswith("json"):
+                        raw_json = raw_json[4:]
+                raw_json = raw_json.strip()
+
+                data = json.loads(raw_json)
+
+                # expenses can come back as list of dicts or a plain dict
+                raw_expenses = data.get("expenses", {})
+                if isinstance(raw_expenses, list):
+                    expenses_dict = {
+                        item.get("category", "other"): float(item.get("amount", 0))
+                        for item in raw_expenses
+                    }
+                elif isinstance(raw_expenses, dict):
+                    expenses_dict = {k: float(v) for k, v in raw_expenses.items()}
+                else:
+                    expenses_dict = {}
+
+                return ParsedFinancialData(
+                    income     = float(data.get("income", 0.0)),
+                    expenses   = expenses_dict,
+                    user_type  = data.get("user_type", "individual"),
+                    period     = data.get("period", "monthly"),
+                    raw_text   = raw_text,
+                    confidence = float(data.get("confidence", 0.5)),
+                )
+
+        except AIParsingError:
+            raise
+
+        except AIServiceUnavailableError:
+            raise
 
         except Exception as e:
-            if "quota" in str(e).lower() or "unavailable" in str(e).lower():
+            if "quota" in str(e).lower() or "unavailable" in str(e).lower() or "429" in str(e):
                 logger.error("Gemini service unavailable: %s", str(e))
                 raise AIServiceUnavailableError("AI service is currently unavailable.") from e
 
