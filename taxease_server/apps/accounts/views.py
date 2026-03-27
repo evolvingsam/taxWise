@@ -72,3 +72,7 @@ class MeView(generics.RetrieveUpdateAPIView):
     @extend_schema(exclude=True)
     def put(self, request, *args, **kwargs):
         return super().put(request, *args, **kwargs)
+
+
+    def get_object(self):
+        return self.request.user

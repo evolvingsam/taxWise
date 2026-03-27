@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { CreditCard, CheckCircle2, ShieldCheck, Lock } from "lucide-react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { CreditCard, Wallet, Building2, CheckCircle2, Loader2, ShieldCheck, Lock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useAuth } from "@/lib/AuthContext";
@@ -11,6 +11,36 @@ import toast from "react-hot-toast";
 
 type PaymentStatus = "selecting" | "processing" | "success" | "error";
 
+
+type WebpayCheckoutPayload = {
+  merchant_code: string;
+  pay_item_id: string;
+  txn_ref: string;
+  amount: number;
+  currency: number;
+  cust_email: string;
+  mode: "TEST" | "LIVE";
+  pay_item_name?: string;
+  cust_name?: string;
+  cust_id?: string;
+  cust_mobile_no?: string;
+  site_redirect_url?: string;
+  onComplete: (response: InlineCheckoutResponse) => void;
+};
+
+declare global {
+  interface Window {
+    webpayCheckout?: (payload: WebpayCheckoutPayload) => void;
+  }
+}
+
+const INTERSWITCH_TEST_CONFIG = {
+  merchantCode: "MX6072",
+  payItemId: "9405967",
+  mode: "TEST" as const,
+  currency: 566,
+  scriptUrl: "https://newwebpay.qa.interswitchng.com/inline-checkout.js",
+};
 
 function PaymentContent() {
   const [status, setStatus] = useState<PaymentStatus>("selecting");
@@ -275,7 +305,7 @@ function PaymentContent() {
 
 export default function PaymentPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center p-4 text-sm text-gray-500">Loading payment...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-brand-dark">Loading...</div>}>
       <PaymentContent />
     </Suspense>
   );

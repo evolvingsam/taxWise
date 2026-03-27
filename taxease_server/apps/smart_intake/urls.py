@@ -4,15 +4,21 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
     SpectacularRedocView,
 )
-from .intake.views import SmartIntakeView, LedgerHistoryView, LedgerDetailView
+from .intake.views import (
+    SmartIntakeView,
+    LedgerHistoryView,
+    LedgerDetailView,
+    VoiceIntakeView,
+)
 
 urlpatterns = [
     # Core intake
-    path("",                       SmartIntakeView.as_view(),   name="smart-intake"),
+    path("",                        SmartIntakeView.as_view(),   name="smart-intake"),
+    path("voice/",                  VoiceIntakeView.as_view(),   name="voice-intake"),
 
     # Ledger history
-    path("ledger/",                LedgerHistoryView.as_view(), name="ledger-history"),
-    path("ledger/<uuid:entry_id>/", LedgerDetailView.as_view(), name="ledger-detail"),
+    path("ledger/",                 LedgerHistoryView.as_view(), name="ledger-history"),
+    path("ledger/<uuid:entry_id>/", LedgerDetailView.as_view(),  name="ledger-detail"),
 
     # Docs
     path("schema/", SpectacularAPIView.as_view(),   name="smart-intake-schema"),
