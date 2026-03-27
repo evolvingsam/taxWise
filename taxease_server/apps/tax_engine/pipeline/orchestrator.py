@@ -50,7 +50,7 @@ class TaxEngineOrchestrator:
         self.formatter   = ResultFormatter()
         self.repository  = TaxEngineRepository()
 
-    def run(self, user_id: str) -> EngineResult:
+    def run(self, user_id: str, entity_type: str = "individual") -> EngineResult:
         tax_year = timezone.now().year
         logger.info("Tax engine started. user=%s year=%d", user_id, tax_year)
 
