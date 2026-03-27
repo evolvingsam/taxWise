@@ -78,7 +78,7 @@ class GeminiFinancialParser(BaseFinancialParser):
                 confidence = float(data.get("confidence", 0.5)),
             )
 
-         except json.JSONDecodeError as e:
+        except json.JSONDecodeError as e:
             logger.error("JSON decode failed. raw=%s error=%s", raw_json, str(e))
             raise AIParsingError("AI returned an unparseable response.") from e
 
