@@ -108,7 +108,10 @@ class TaxEngineOrchestrator:
     def _persist(self, data, result: FormattedResult):
         """Save result and mark ledger entries processed. Non-blocking."""
         try:
-            self.repository.save_result(result.to_db_dict())
+            self.repository.save_result(
+                user_id     = data.user_id,        
+                result_data = result.to_db_dict(), 
+            )
             self.repository.mark_entries_processed(data.pending_entries)
         except Exception as e:
             logger.error("Persist failed (non-blocking): %s", str(e), exc_info=True)

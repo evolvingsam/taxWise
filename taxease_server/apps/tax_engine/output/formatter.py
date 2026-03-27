@@ -39,7 +39,6 @@ class FormattedResult:
 
     def to_db_dict(self) -> dict:
         return {
-            "user_id":            self.user_id,
             "tax_year":           self.tax_year,
             "status":             self.status,
             "gross_income":       self.gross_income,
