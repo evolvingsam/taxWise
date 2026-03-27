@@ -25,7 +25,7 @@ export default function SmartIntakePage() {
     {
       id: "1",
       role: "assistant",
-      content: "Hello! I'm your TaxWise AI assistant. How can I help you with your tax filing today? You can just tell me what you earned or spent (e.g., 'I run a shop, I earned ₦40k'), and I'll map it to the correct tax bracket for you.",
+      content: "Hello! I'm your TaxWise AI assistant. To help calculate your tax at the end of the month, please tell me your total income and expenses for the month (e.g., 'This month my shop made ₦150k in total, and I spent ₦20k on rent').",
       timestamp: new Date(),
     },
   ]);
@@ -250,7 +250,7 @@ export default function SmartIntakePage() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
-            placeholder="Type your income/expenses (e.g. I earned ₦40,000 today from sales)"
+            placeholder="Type your monthly income and expenses (e.g., I earned ₦150,000 this month from sales)"
             className="flex-1 bg-muted/30 border border-gray-100 rounded-2xl px-6 py-4 text-sm focus:outline-none focus:border-brand-gold"
           />
           <button
