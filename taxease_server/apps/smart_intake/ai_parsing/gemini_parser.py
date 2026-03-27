@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Literal
+from typing import Literal
 from google import genai
 from google.genai import types
 from django.conf import settings
@@ -10,14 +10,20 @@ from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+# 1. Create a strict schema for a single expense item
+class ExpenseItem(BaseModel):
+    category: str = Field(description="The category of the expense (e.g., rent, food, transport, marketing).")
+    amount: float = Field(description="The amount spent in NGN.")
+
+# 2. Update the main schema to use a List of ExpenseItems
 class FinancialExtractionSchema(BaseModel):
     income: float = Field(
         default=0.0, 
         description="Total income in Nigerian Naira (NGN)."
     )
-    expenses: Dict[str, float] = Field(
-        default_factory=dict, 
-        description="Dictionary of expense categories as keys and amounts as values in NGN."
+    expenses: list[ExpenseItem] = Field(
+        default_factory=list, 
+        description="A list of all expenses extracted from the text."
     )
     user_type: Literal["individual", "sme", "corporate"] = Field(
         default="individual",
@@ -30,7 +36,7 @@ class FinancialExtractionSchema(BaseModel):
     confidence: float = Field(
         default=0.5,
         ge=0.0, le=1.0, 
-        description="Confidence score of the extraction between 0 and 1."
+        description="Confidence score of the extraction between 0.0 and 1.0."
     )
 
 SYSTEM_PROMPT = """
@@ -64,14 +70,17 @@ class GeminiFinancialParser(BaseFinancialParser):
                 logger.error(f"Gemini returned an empty response. Raw: {response}")
                 raise AIParsingError("AI returned an empty response (possibly blocked by safety filters).")
 
-            
             extracted: FinancialExtractionSchema = response.parsed
 
-            logger.debug("Successfully parsed Gemini response: %s", extracted.model_dump_json())
+            # 3. Convert the list of ExpenseItems back into a standard dictionary
+            # e.g., turns [{"category": "rent", "amount": 500}] into {"rent": 500.0}
+            expenses_dict = {item.category: item.amount for item in extracted.expenses}
+
+            logger.debug("Successfully parsed Gemini response.")
 
             return ParsedFinancialData(
                 income     = extracted.income,
-                expenses   = extracted.expenses,
+                expenses   = expenses_dict,  # Pass the converted dictionary here
                 user_type  = extracted.user_type,
                 period     = extracted.period,
                 raw_text   = raw_text,
