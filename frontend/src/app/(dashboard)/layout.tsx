@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { usePathname } from "next/navigation";
-import { Home, FileText, History, Bell, Search, Settings } from "lucide-react";
+import { Home, FileText, History, Search, Settings } from "lucide-react";
 import { LogoutButton } from "@/components/dashboard/LogoutButton";
 import { useAuth } from "@/lib/AuthContext";
 
@@ -44,28 +44,13 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-6">
-            <button className="relative text-gray-400 hover:text-brand-dark transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute -top-1 -right-1 w-2 h-2 bg-brand-gold rounded-full border-2 border-white"></span>
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-brand-dark leading-none">
-                  {user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email : "TaxWise User"}
-                </div>
-                <div className="text-[10px] text-brand-gold font-bold uppercase tracking-widest mt-1">{user?.user_type || "Verified"}</div>
-              </div>
-              <div className="h-10 w-10 rounded-xl bg-brand-dark text-brand-gold flex items-center justify-center font-bold shadow-sm">
-                {initials}
-              </div>
-            </div>
             <LogoutButton />
           </div>
         </div>
       </header>
       <div className="container flex-1 items-start md:grid md:grid-cols-[240px_minmax(0,1fr)] md:gap-8 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-12 px-4 lg:px-8 py-10 mx-auto">
         <aside className="fixed top-24 z-30 -ml-2 hidden h-[calc(100vh-8rem)] w-full shrink-0 md:sticky md:block">
-          <div className="h-full pr-6 border-r border-gray-100 text-sm flex flex-col">
+          <div className="h-full pb-8 pr-6 border-r border-gray-100 text-sm flex flex-col justify-between">
             <div className="space-y-1">
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.href;
@@ -92,7 +77,21 @@ export default function DashboardLayout({
               })}
             </div>
 
-
+            <div className="mt-8 border-t border-gray-100 pt-6">
+              <div className="flex items-center gap-3 px-2">
+                <div className="h-10 w-10 shrink-0 rounded-xl bg-brand-dark text-brand-gold flex items-center justify-center font-bold shadow-sm">
+                  {initials}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <div className="text-sm font-bold text-brand-dark leading-tight truncate">
+                    {user ? `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.email : "TaxWise User"}
+                  </div>
+                  <div className="text-[10px] text-brand-gold font-bold uppercase tracking-widest mt-1">
+                    {user?.user_type || "Verified"}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </aside>
         <main className="flex w-full flex-col overflow-hidden pb-24 md:pb-0">

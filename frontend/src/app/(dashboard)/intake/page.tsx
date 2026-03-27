@@ -11,6 +11,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: Date;
+  audioUrl?: string;
   extractedData?: {
     income?: number;
     expenses?: Record<string, number>;
@@ -34,6 +35,9 @@ export default function SmartIntakePage() {
   const [isTyping, setIsTyping] = useState(false);
   const [lastLedgerId, setLastLedgerId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<BlobPart[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
   const { withFreshAccessToken } = useAuth();
 
   useEffect(() => {
@@ -99,6 +103,92 @@ export default function SmartIntakePage() {
     }
   };
 
+  const handleToggleRecord = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+    } else {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mediaRecorder = new MediaRecorder(stream);
+        mediaRecorderRef.current = mediaRecorder;
+        chunksRef.current = [];
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunksRef.current.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+          setIsRecording(false);
+          const tracks = stream.getTracks();
+          tracks.forEach(track => track.stop());
+
+          const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
+          await submitAudio(audioBlob);
+        };
+
+        mediaRecorder.start();
+        setIsRecording(true);
+      } catch (err) {
+        toast.error("Microphone access denied or error occurred");
+      }
+    }
+  };
+
+  const submitAudio = async (audioBlob: Blob) => {
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: "🎤 Voice note sent",
+      audioUrl,
+      timestamp: new Date(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    setIsTyping(true);
+
+    try {
+      const token = await withFreshAccessToken();
+      const response = await api.submitVoiceIntake(token, audioBlob, source);
+      const parsed = response?.parsed || {};
+      const isPartial = response?.status === "partial_failure";
+
+      if (response?.ledger_id) {
+        setLastLedgerId(response.ledger_id);
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: isPartial
+          ? `I parsed your voice entry with partial confidence. ${response?.message || "Please review extracted values before filing."}`
+          : `Voice entry captured successfully. ${response?.message || "Your intake has been added to your ledger."}`,
+        timestamp: new Date(),
+        extractedData: {
+          income: parsed.income,
+          expenses: parsed.expenses,
+          user_type: parsed.user_type,
+          period: parsed.period,
+          confidence: parsed.confidence,
+        },
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      toast.success(isPartial ? "Voice intake saved partially" : "Voice intake submitted");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Please try again.";
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `I could not process the voice intake. ${errorMessage}`,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+      toast.error(errorMessage || "Failed to submit voice intake");
+    } finally {
+      setIsTyping(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto w-full border rounded-3xl bg-white overflow-hidden shadow-sm">
       {/* Header */}
@@ -128,7 +218,14 @@ export default function SmartIntakePage() {
               </div>
               <div className="space-y-2">
                 <div className={`p-5 rounded-3xl text-sm leading-relaxed shadow-sm ${m.role === "user" ? "bg-brand-dark text-white rounded-tr-none" : "bg-white text-brand-dark border rounded-tl-none"}`}>
-                  {m.content}
+                  {m.audioUrl ? (
+                    <div className="flex flex-col gap-2">
+                      <audio controls src={m.audioUrl} className="h-10 w-[200px] outline-none rounded-full [&::-webkit-media-controls-enclosure]:bg-white/20 [&::-webkit-media-controls-panel]:bg-white/20" />
+                      <span className="text-[10px] opacity-70 px-2">{m.content}</span>
+                    </div>
+                  ) : (
+                    m.content
+                  )}
                 </div>
 
                 {/* Extracted Data Card */}
@@ -211,7 +308,14 @@ export default function SmartIntakePage() {
       {/* Input Area */}
       <div className="p-6 bg-white border-t">
         <div className="relative flex items-center gap-3">
-          <button className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-brand-gold hover:border-brand-gold transition-colors">
+          <button
+            onClick={handleToggleRecord}
+            disabled={isTyping}
+            className={`w-12 h-12 rounded-full border flex items-center justify-center transition-colors ${isRecording
+                ? "border-red-500 bg-red-100 text-red-500 animate-pulse"
+                : "border-gray-200 text-gray-400 hover:text-brand-gold hover:border-brand-gold bg-transparent"
+              }`}
+          >
             <Mic className="w-6 h-6" />
           </button>
           <input

@@ -232,6 +232,28 @@ export async function submitSmartIntake(token: string, raw_text: string, source:
   return data as SmartIntakeResponse;
 }
 
+export async function submitVoiceIntake(token: string, audioBlob: Blob, source: string = "web") {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "recording.webm");
+  formData.append("source", source);
+
+  const res = await fetch(`${BASE_API_URL}/smart-intake/voice/`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`
+    },
+    body: formData,
+  });
+  
+  const data = await parseResponse<SmartIntakeResponse>(res);
+  
+  if (!res.ok && res.status !== 207) {
+    throw new Error(getErrorMessage(data, "Failed to submit voice intake"));
+  }
+  
+  return data as SmartIntakeResponse;
+}
+
 export async function getLedgerHistory(token: string) {
   const res = await fetch(`${BASE_API_URL}/smart-intake/ledger/`, {
     method: "GET",
