@@ -70,3 +70,30 @@ class LedgerHistoryResponseSerializer(serializers.Serializer):
 class LedgerDetailResponseSerializer(serializers.Serializer):
     status = serializers.ChoiceField(choices=["success"])
     data   = LedgerEntrySerializer()
+
+class VoiceIntakeSerializer(serializers.Serializer):
+    """Accepts an audio file for voice-based financial intake."""
+
+    audio = serializers.FileField(
+        help_text=(
+            "Audio file containing the user's financial description. "
+            "Supported formats: mp3, mp4, wav, webm, ogg, m4a. Max size: 25MB."
+        )
+    )
+    source = serializers.ChoiceField(
+        choices=["web", "voice", "api"],
+        default="voice",
+    )
+
+
+class VoiceIntakeSuccessResponseSerializer(serializers.Serializer):
+    status        = serializers.ChoiceField(choices=["success"])
+    ledger_id     = serializers.UUIDField()
+    transcript    = serializers.CharField(help_text="The text Whisper extracted from your audio.")
+    parsed        = ParsedDataSerializer()
+    intake_status = serializers.CharField()
+
+
+class VoiceIntakeErrorResponseSerializer(serializers.Serializer):
+    status  = serializers.ChoiceField(choices=["error"])
+    message = serializers.CharField()

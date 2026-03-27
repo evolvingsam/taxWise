@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
-
+from rest_framework.parsers import MultiPartParser, FormParser
 from drf_spectacular.utils import extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
 
@@ -13,11 +13,21 @@ from .serializers import (
     LedgerHistoryResponseSerializer,
     LedgerDetailResponseSerializer,
     LedgerEntrySerializer,
+    VoiceIntakeSerializer,
+    VoiceIntakeSuccessResponseSerializer,
+    VoiceIntakeErrorResponseSerializer,
 )
 from .validators import RawIntakePayload
 from ..pipeline.orchestrator import IntakePipelineOrchestrator
 from ..persistence.repository import IntakeRepository
 from ..utils.logging import get_logger
+
+from ..voice.transcriber import WhisperTranscriber
+from ..voice.exceptions import (
+    TranscriptionError,
+    AudioValidationError,
+    TranscriptionServiceUnavailableError,
+)
 
 logger = get_logger(__name__)
 
@@ -211,4 +221,128 @@ class LedgerDetailView(APIView):
         return Response(
             {"status": "success", "data": serializer.data},
             status=status.HTTP_200_OK,
+        )
+
+
+class VoiceIntakeView(APIView):
+    """
+    Accepts an audio file, transcribes it via Whisper,
+    then runs the transcript through the exact same intake pipeline.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser]   
+
+    @extend_schema(
+        tags=["Smart Intake"],
+        summary="Submit a voice financial intake",
+        description=(
+            "Upload an audio file containing a plain-English description of your finances. "
+            "The audio is transcribed via OpenAI Whisper, then processed through "
+            "the same AI parsing and ledger pipeline as text intake. "
+            "Supported formats: mp3, mp4, wav, webm, ogg, m4a. Max: 25MB."
+        ),
+        request={
+            "multipart/form-data": VoiceIntakeSerializer,
+        },
+        responses={
+            201: OpenApiResponse(
+                response=VoiceIntakeSuccessResponseSerializer,
+                description="Audio transcribed, parsed, and ledger entry created.",
+            ),
+            400: OpenApiResponse(
+                response=VoiceIntakeErrorResponseSerializer,
+                description="Invalid or missing audio file.",
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided.",
+            ),
+            422: OpenApiResponse(
+                response=VoiceIntakeErrorResponseSerializer,
+                description="Audio contained no financial information.",
+            ),
+            503: OpenApiResponse(
+                response=VoiceIntakeErrorResponseSerializer,
+                description="Transcription or AI service unavailable.",
+            ),
+        },
+    )
+    def post(self, request):
+        serializer = VoiceIntakeSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                {"status": "error", "message": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        audio_file = serializer.validated_data["audio"]
+        source     = serializer.validated_data.get("source", "voice")
+
+        # ── Stage 1: Transcribe audio → text ──────────────────────────────────
+        transcriber = WhisperTranscriber()
+
+        try:
+            transcript = transcriber.transcribe(audio_file)
+        except AudioValidationError as e:
+            logger.warning("Audio validation failed: %s", str(e))
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except TranscriptionServiceUnavailableError as e:
+            logger.error("Transcription service unavailable: %s", str(e))
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+        except TranscriptionError as e:
+            logger.error("Transcription failed: %s", str(e))
+            return Response(
+                {"status": "error", "message": "Could not transcribe audio. Please try again."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        logger.info(
+            "Audio transcribed for user=%s transcript_length=%d",
+            request.user.id, len(transcript),
+        )
+
+        # ── Stage 2: Feed transcript into existing intake pipeline ─────────────
+        payload = RawIntakePayload(
+            user_id  = str(request.user.id),
+            raw_text = transcript,
+            source   = source,
+        )
+
+        try:
+            payload.validate()
+        except ValueError as e:
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        orchestrator = IntakePipelineOrchestrator()
+        result       = orchestrator.run(payload)
+
+        if result.success:
+            response_data = result.to_dict()
+            response_data["transcript"] = transcript   # return transcript to frontend
+            return Response(response_data, status=status.HTTP_201_CREATED)
+
+        if result.error and "unavailable" in result.error.lower():
+            return Response(
+                {"status": "error", "message": result.error},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE,
+            )
+
+        if result.error and "no financial" in result.error.lower():
+            return Response(
+                {"status": "error", "message": result.error},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            )
+
+        return Response(
+            {"status": "partial_failure", "message": result.error, "transcript": transcript},
+            status=status.HTTP_207_MULTI_STATUS,
         )
