@@ -1,5 +1,6 @@
 import json
-import google.genai as genai
+from google import genai
+from google.genai import types
 from django.conf import settings
 
 from .parser import BaseFinancialParser, ParsedFinancialData
@@ -32,19 +33,18 @@ Rules:
 class GeminiFinancialParser(BaseFinancialParser):
 
     def __init__(self):
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        self.model = genai.GenerativeModel(
-            model_name=getattr(settings, "GEMINI_MODEL", "gemini-1.5-flash"),
-            system_instruction=SYSTEM_PROMPT,
-        )
+        self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
+        self.model_name = getattr(settings, "GEMINI_MODEL", "gemini-2.0-flash")
 
     def parse(self, raw_text: str) -> ParsedFinancialData:
-        logger.info("Sending text to Gemini parser. length=%d", len(raw_text))
+        logger.info("Sending text to Gemini (google-genai). length=%d", len(raw_text))
 
         try:
-            response = self.model.generate_content(
-                raw_text,
-                generation_config=genai.GenerationConfig(
+            response = self.client.models.generate_content(
+                model=self.model_name,
+                contents=raw_text,
+                config=types.GenerateContentConfig(
+                    system_instruction=SYSTEM_PROMPT,
                     temperature=0.1,
                     max_output_tokens=300,
                 )
