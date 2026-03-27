@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import * as api from "./api";
 import Cookies from "js-cookie";
 
@@ -21,9 +21,64 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<api.AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const accessTokenRef = useRef<string | null>(null);
+  const refreshTokenRef = useRef<string | null>(null);
+
+  const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+
+  const getAccessToken = () => {
+    if (accessTokenRef.current) return accessTokenRef.current;
+    const fromCookie = Cookies.get("access_token");
+    if (fromCookie) return fromCookie;
+    if (typeof window !== "undefined") {
+      try {
+        return window.localStorage.getItem("access_token");
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const getRefreshToken = () => {
+    if (refreshTokenRef.current) return refreshTokenRef.current;
+    const fromCookie = Cookies.get("refresh_token");
+    if (fromCookie) return fromCookie;
+    if (typeof window !== "undefined") {
+      try {
+        return window.localStorage.getItem("refresh_token");
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const persistTokens = (access: string, refresh?: string) => {
+    const nextAccess = access.trim();
+    const nextRefresh = refresh?.trim();
+
+    accessTokenRef.current = nextAccess;
+    if (nextRefresh) refreshTokenRef.current = nextRefresh;
+
+    const cookieOptions = { path: "/", secure: isHttps, sameSite: "lax" as const };
+    Cookies.set("access_token", nextAccess, { ...cookieOptions, expires: 1 });
+    if (nextRefresh) {
+      Cookies.set("refresh_token", nextRefresh, { ...cookieOptions, expires: 7 });
+    }
+
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.setItem("access_token", nextAccess);
+        if (nextRefresh) window.localStorage.setItem("refresh_token", nextRefresh);
+      } catch {
+        // Ignore storage failures; cookies + in-memory token refs remain valid.
+      }
+    }
+  };
 
   const fetchProfile = async (accessToken?: string) => {
-    const token = accessToken || Cookies.get("access_token");
+    const token = accessToken || getAccessToken();
     if (!token) return null;
 
     const profile = await api.getProfile(token);
@@ -32,31 +87,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const clearSession = () => {
-    Cookies.remove("access_token");
-    Cookies.remove("refresh_token");
+    accessTokenRef.current = null;
+    refreshTokenRef.current = null;
+    Cookies.remove("access_token", { path: "/" });
+    Cookies.remove("refresh_token", { path: "/" });
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem("access_token");
+        window.localStorage.removeItem("refresh_token");
+      } catch {
+        // Ignore storage failures.
+      }
+    }
     setUser(null);
   };
 
   const refreshSession = async () => {
-    const refresh = Cookies.get("refresh_token");
+    const refresh = getRefreshToken();
     if (!refresh) throw new Error("Session expired. Please log in again.");
 
     const data = await api.refreshToken(refresh);
-    Cookies.set("access_token", data.access, { expires: 1, secure: true, sameSite: "strict" });
-    if (data.refresh) {
-      Cookies.set("refresh_token", data.refresh, { expires: 7, secure: true, sameSite: "strict" });
-    }
+    persistTokens(data.access, data.refresh);
     return data.access;
   };
 
   useEffect(() => {
     async function loadUser() {
-      const token = Cookies.get("access_token");
+      const cookieAccess = Cookies.get("access_token") || null;
+      const cookieRefresh = Cookies.get("refresh_token") || null;
+      const storageAccess = typeof window !== "undefined" ? (() => {
+        try {
+          return window.localStorage.getItem("access_token");
+        } catch {
+          return null;
+        }
+      })() : null;
+      const storageRefresh = typeof window !== "undefined" ? (() => {
+        try {
+          return window.localStorage.getItem("refresh_token");
+        } catch {
+          return null;
+        }
+      })() : null;
+
+      accessTokenRef.current = cookieAccess || storageAccess;
+      refreshTokenRef.current = cookieRefresh || storageRefresh;
+
+      const token = getAccessToken();
+      const refresh = getRefreshToken();
+
       if (token) {
         try {
           await fetchProfile(token);
         } catch (err) {
-          console.error("Failed to load user profile", err);
+          console.error("Access token profile fetch failed, trying refresh", err);
+          try {
+            const newAccess = await refreshSession();
+            await fetchProfile(newAccess);
+          } catch (refreshErr) {
+            console.error("Refresh during bootstrap failed", refreshErr);
+            clearSession();
+          }
+        }
+      } else if (refresh) {
+        try {
+          const newAccess = await refreshSession();
+          await fetchProfile(newAccess);
+        } catch (refreshErr) {
+          console.error("Refresh-only bootstrap failed", refreshErr);
           clearSession();
         }
       }
@@ -75,14 +173,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data.refresh) {
         throw new Error("No refresh token returned from login");
       }
-      
-      Cookies.set("access_token", data.access, { expires: 1, secure: false, sameSite: "lax" });
-      Cookies.set("refresh_token", data.refresh, { expires: 7, secure: false, sameSite: "lax" });
-      
-      console.log("Tokens stored:", {
-        hasAccess: !!Cookies.get("access_token"),
-        hasRefresh: !!Cookies.get("refresh_token"),
-      });
+
+      persistTokens(data.access, data.refresh);
 
       if (data.user) {
         setUser(data.user);
@@ -103,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const updateProfile = async (profileData: api.ProfileUpdatePayload) => {
-    const token = Cookies.get("access_token");
+    const token = getAccessToken();
     if (!token) throw new Error("Please log in to update your profile.");
 
     const updated = await api.updateProfile(token, profileData);
@@ -112,7 +204,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    const refresh = Cookies.get("refresh_token");
+    const refresh = getRefreshToken();
     if (refresh) {
       try {
         await api.logout(refresh);
@@ -124,7 +216,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const withFreshAccessToken = async () => {
-    let token = Cookies.get("access_token");
+    let token = getAccessToken();
     if (token) return token;
 
     try {

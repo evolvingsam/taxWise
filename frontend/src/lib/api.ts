@@ -96,6 +96,8 @@ export interface PaymentInitiateResponse {
   status: "success" | "error" | string;
   message?: string;
   tx_ref: string;
+  payment_id?: number;
+  redirect_url?: string;
 }
 
 export interface TransactionStatusResponse {
@@ -265,6 +267,7 @@ export async function calculateTax(token: string) {
 export interface PaymentPayload {
   amount: number;
   tax_year: number;
+  tx_ref?: string;
 }
 
 export async function initiatePayment(token: string, payload: PaymentPayload) {
