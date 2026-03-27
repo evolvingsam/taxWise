@@ -3,6 +3,7 @@ from typing import Optional
 
 from ..verification.interswitch import InterswitchVerifier
 from ..rrr.generator import RRRGenerator
+from ..rrr.tx_ref_generator import TxRefGenerator
 from ..persistence.repository import PaymentRepository
 from ..utils.logging import get_logger
 
@@ -40,6 +41,7 @@ class PaymentOrchestrator:
     def __init__(self):
         self.verifier   = InterswitchVerifier()
         self.generator  = RRRGenerator()
+        self.tx_generator  = TxRefGenerator()
         self.repository = PaymentRepository()
 
     def handle_webhook(self, payload: dict) -> PaymentResult:
@@ -115,15 +117,17 @@ class PaymentOrchestrator:
 
     def initiate_transaction(
         self,
-        user_id:  str,
-        tx_ref:   str,
+        user_id:  int,
         amount:   float,
         tax_year: int,
-    ):
-        """Called by the frontend before opening the Interswitch modal."""
-        return self.repository.create_transaction(
-            user_id=user_id,
-            tx_ref=tx_ref,
-            amount=amount,
-            tax_year=tax_year,
+    ) -> str:
+        """Creates a pending transaction and returns the generated tx_ref."""
+        tx_ref = self.tx_generator.generate(user_id)   # ← generated here
+
+        self.repository.create_transaction(
+            user_id  = user_id,
+            tx_ref   = tx_ref,
+            amount   = amount,
+            tax_year = tax_year,
         )
+        return tx_ref

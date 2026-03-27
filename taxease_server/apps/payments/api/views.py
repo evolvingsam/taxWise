@@ -76,8 +76,7 @@ class InitiatePaymentView(APIView):
 
         try:
             orchestrator.initiate_transaction(
-                user_id  = request.user.id,    # ← from JWT, not request body
-                tx_ref   = data["tx_ref"],
+                user_id  = request.user.id,    
                 amount   = data["amount"],
                 tax_year = data["tax_year"],
             )
@@ -92,7 +91,7 @@ class InitiatePaymentView(APIView):
             {
                 "status":  "success",
                 "message": "Transaction initiated. Proceed to payment.",
-                "tx_ref":  data["tx_ref"],
+                "tx_ref":  tx_ref,
             },
             status=status.HTTP_201_CREATED,
         )
@@ -165,3 +164,32 @@ class InterswitchWebhookView(APIView):
             return Response(result.to_dict(), status=status.HTTP_200_OK)
 
         return Response(result.to_dict(), status=status.HTTP_400_BAD_REQUEST)
+
+
+class TransactionStatusView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @extend_schema(
+        tags=["Payments"],
+        summary="Get transaction status and RRR",
+        description="Returns the current status and RRR code of a transaction.",
+    )
+    def get(self, request, tx_ref):
+        from ..persistence.models import PaymentTransaction
+
+        try:
+            tx = PaymentTransaction.objects.get(
+                interswitch_tx_ref=tx_ref,
+                user=request.user,       # ← user can only see their own
+            )
+            return Response({
+                "status":   tx.status,
+                "rrr_code": tx.rrr_code,
+                "amount":   str(tx.amount),
+                "tax_year": tx.tax_year,
+            })
+        except PaymentTransaction.DoesNotExist:
+            return Response(
+                {"status": "error", "message": "Transaction not found."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
