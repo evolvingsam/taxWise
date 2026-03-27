@@ -8,18 +8,26 @@ import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { useAuth } from "@/lib/AuthContext";
 import toast from "react-hot-toast";
 
+type UserType = "individual" | "sme" | "corporate";
+
 export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [userType, setUserType] = useState<UserType | "">("");
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { register } = useAuth() as any;
+  const { register } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!userType) {
+      toast.error("Select a user type to continue");
+      return;
+    }
+
     setLoading(true);
 
     const nameParts = name.trim().split(" ");
@@ -32,7 +40,7 @@ export default function SignupPage() {
         password,
         first_name: firstName,
         last_name: lastName,
-        user_type: "individual", // default for now
+        user_type: userType,
       });
       // Registration successful, redirect to login page
       toast.success("Account created successfully! Please log in.");
@@ -98,6 +106,37 @@ export default function SignupPage() {
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all"
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <p className="block text-sm font-bold text-brand-dark uppercase tracking-wider">User Type</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { id: "individual", label: "Individual" },
+                  { id: "sme", label: "SME" },
+                  { id: "corporate", label: "Corporate" },
+                ].map((option) => {
+                  const checked = userType === option.id;
+                  return (
+                    <label
+                      key={option.id}
+                      className={`flex items-center gap-2 px-4 py-3 rounded-xl border cursor-pointer transition-all ${
+                        checked
+                          ? "border-brand-gold bg-brand-gold/10"
+                          : "border-gray-200 bg-gray-50 hover:bg-white"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => setUserType(option.id as UserType)}
+                        className="h-4 w-4 accent-brand-dark"
+                      />
+                      <span className="text-sm font-semibold text-brand-dark">{option.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="pt-4 animate-fade-in-up [animation-delay:600ms] opacity-0">

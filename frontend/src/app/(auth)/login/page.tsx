@@ -11,20 +11,30 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth() as any;
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
+    
     setLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
+      if (!user) {
+        throw new Error("Login failed: no user returned");
+      }
       toast.success("Successfully logged in!");
       router.push("/dashboard");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to log in");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to log in";
+      console.error("Login error:", errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

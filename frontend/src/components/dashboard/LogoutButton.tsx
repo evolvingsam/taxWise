@@ -5,14 +5,27 @@ import { LogOut, AlertTriangle } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/AuthContext";
+import toast from "react-hot-toast";
 
 export function LogoutButton() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    // Perform standard logout...
-    router.push("/");
+  const handleLogout = async () => {
+    setIsLoading(true);
+    try {
+      await logout();
+      toast.success("Signed out successfully");
+      router.push("/");
+    } catch {
+      toast.error("Failed to sign out cleanly");
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
   };
 
   return (
@@ -48,8 +61,9 @@ export function LogoutButton() {
           <Button 
             className="w-full rounded-xl bg-red-500 hover:bg-red-600 text-white shadow-md border-0"
             onClick={handleLogout}
+            disabled={isLoading}
           >
-            Sign Out
+            {isLoading ? "Signing Out..." : "Sign Out"}
           </Button>
         </div>
       </Modal>

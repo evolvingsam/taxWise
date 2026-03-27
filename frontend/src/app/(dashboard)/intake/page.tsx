@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Send, Mic, User, Bot, Sparkles, CheckCircle2, AlertCircle, TrendingUp } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Send, Mic, User, Bot, Sparkles, CheckCircle2 } from "lucide-react";
+import * as api from "@/lib/api";
+import { useAuth } from "@/lib/AuthContext";
+import toast from "react-hot-toast";
 
 interface Message {
   id: string;
@@ -12,7 +14,9 @@ interface Message {
   extractedData?: {
     income?: number;
     expenses?: Record<string, number>;
-    category?: string;
+    user_type?: string;
+    period?: string;
+    confidence?: number;
   };
 }
 
@@ -26,8 +30,11 @@ export default function SmartIntakePage() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [source, setSource] = useState("web");
   const [isTyping, setIsTyping] = useState(false);
+  const [lastLedgerId, setLastLedgerId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { withFreshAccessToken } = useAuth();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -35,7 +42,7 @@ export default function SmartIntakePage() {
     }
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -49,18 +56,47 @@ export default function SmartIntakePage() {
     setInput("");
     setIsTyping(true);
 
-    // Simulate AI behavior
-    setTimeout(() => {
+    try {
+      const token = await withFreshAccessToken();
+      const response = await api.submitSmartIntake(token, userMessage.content, source);
+      const parsed = response?.parsed || {};
+      const isPartial = response?.status === "partial_failure";
+
+      if (response?.ledger_id) {
+        setLastLedgerId(response.ledger_id);
+      }
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
-        content: simulateAIResponse(input),
+        content: isPartial
+          ? `I parsed your entry with partial confidence. ${response?.message || "Please review extracted values before filing."}`
+          : `Entry captured successfully. ${response?.message || "Your intake has been added to your ledger."}`,
         timestamp: new Date(),
-        extractedData: simulateExtraction(input),
+        extractedData: {
+          income: parsed.income,
+          expenses: parsed.expenses,
+          user_type: parsed.user_type,
+          period: parsed.period,
+          confidence: parsed.confidence,
+        },
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      toast.success(isPartial ? "Intake saved with partial extraction" : "Intake submitted");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Please try again.";
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: `I could not submit this intake. ${errorMessage}`,
+        timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMessage]);
+      toast.error(errorMessage || "Failed to submit financial intake");
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -88,6 +124,31 @@ export default function SmartIntakePage() {
         </div>
       </div>
 
+      <div className="px-6 py-3 bg-amber-50 border-b border-amber-100 flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+        <p className="text-xs text-amber-800 font-semibold">
+          Source value is required by backend. Current source: <span className="uppercase">{source}</span>
+        </p>
+        <div className="flex gap-2">
+          {[
+            { id: "web", label: "Web" },
+            { id: "mobile", label: "Mobile" },
+            { id: "voice", label: "Voice" },
+          ].map((option) => (
+            <button
+              key={option.id}
+              onClick={() => setSource(option.id)}
+              className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${
+                source === option.id
+                  ? "bg-brand-dark text-brand-gold border-brand-dark"
+                  : "bg-white text-gray-600 border-gray-200"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Chat Area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/50">
         {messages.map((m) => (
@@ -110,17 +171,34 @@ export default function SmartIntakePage() {
                       </span>
                       <CheckCircle2 className="w-4 h-4 text-brand-gold" />
                     </div>
+                    {lastLedgerId && (
+                      <div className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                        Ledger ID: <span className="normal-case tracking-normal">{lastLedgerId}</span>
+                      </div>
+                    )}
                     <div className="grid grid-cols-2 gap-4">
-                      {m.extractedData.income && (
+                      {typeof m.extractedData.income === "number" && (
                         <div>
                           <p className="text-[10px] text-gray-400 font-bold uppercase">Income</p>
                           <p className="font-bold text-lg">₦{m.extractedData.income.toLocaleString()}</p>
                         </div>
                       )}
-                      {m.extractedData.category && (
+                      {m.extractedData.user_type && (
                         <div>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">Category</p>
-                          <p className="font-bold text-sm">{m.extractedData.category}</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">User Type</p>
+                          <p className="font-bold text-sm capitalize">{m.extractedData.user_type}</p>
+                        </div>
+                      )}
+                      {m.extractedData.period && (
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Period</p>
+                          <p className="font-bold text-sm capitalize">{m.extractedData.period}</p>
+                        </div>
+                      )}
+                      {typeof m.extractedData.confidence === "number" && (
+                        <div>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase">Confidence</p>
+                          <p className="font-bold text-sm">{(m.extractedData.confidence * 100).toFixed(1)}%</p>
                         </div>
                       )}
                     </div>
@@ -177,7 +255,7 @@ export default function SmartIntakePage() {
           />
           <button
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isTyping}
             className="w-12 h-12 rounded-full bg-brand-dark text-white flex items-center justify-center hover:bg-brand-gold transition-all disabled:opacity-50"
           >
             <Send className="w-5 h-5" />
@@ -189,32 +267,4 @@ export default function SmartIntakePage() {
       </div>
     </div>
   );
-}
-
-function simulateAIResponse(input: string): string {
-  const text = input.toLowerCase();
-  if (text.includes("earned") || text.includes("made") || text.includes("income") || text.includes("profit")) {
-    return "Great! I've logged that income for you. Your fiscal history is building up. Would you like to add any expenses related to this earning?";
-  }
-  if (text.includes("spent") || text.includes("paid") || text.includes("expense") || text.includes("rent")) {
-    return "Understood. I've recorded those expenses. This will be deductible from your taxable income. Is there anything else you'd like to report?";
-  }
-  return "I've analyzed that information. I'm adding it to your structured financial ledger now. You're doing great with your compliance!";
-}
-
-function simulateExtraction(input: string): Message["extractedData"] {
-  const numbers = input.match(/\d+([,]\d+)*/g);
-  if (!numbers) return undefined;
-
-  const val = parseInt(numbers[0].replace(/,/g, ""));
-  if (input.toLowerCase().includes("earned") || input.toLowerCase().includes("income")) {
-    return { income: val, category: "Business Revenue" };
-  }
-  if (input.toLowerCase().includes("rent")) {
-    return { expenses: { "rent": val }, category: "Operational Expense" };
-  }
-  if (input.toLowerCase().includes("spent") || input.toLowerCase().includes("paid")) {
-    return { expenses: { "miscellaneous": val }, category: "General Expense" };
-  }
-  return { income: val, category: "Uncategorized" };
 }
