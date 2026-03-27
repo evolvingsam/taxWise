@@ -31,6 +31,7 @@ type WebpayCheckoutPayload = {
   cust_name?: string;
   cust_id?: string;
   cust_mobile_no?: string;
+  site_redirect_url?: string;
   onComplete: (response: InlineCheckoutResponse) => void;
 };
 
@@ -122,14 +123,16 @@ export default function PaymentPage() {
 
     const amountInKobo = Math.max(100, Math.round(amount * 100));
     const customerEmail = user?.email || "test.customer@taxwise.dev";
+    const redirectUrl = `${window.location.origin}/payment`;
 
-    window.webpayCheckout({
+    const checkoutPayload: WebpayCheckoutPayload = {
       merchant_code: INTERSWITCH_TEST_CONFIG.merchantCode,
       pay_item_id: INTERSWITCH_TEST_CONFIG.payItemId,
       txn_ref: reference,
       amount: amountInKobo,
       currency: INTERSWITCH_TEST_CONFIG.currency,
       cust_email: customerEmail,
+      site_redirect_url: redirectUrl,
       pay_item_name: `Tax filing ${taxYear}`,
       mode: INTERSWITCH_TEST_CONFIG.mode,
       onComplete: (response) => {
@@ -146,7 +149,10 @@ export default function PaymentPage() {
           toast("Checkout finished. Transaction not yet approved.");
         }
       },
-    });
+    };
+
+    console.log("[Payment Debug] Interswitch checkout payload", checkoutPayload);
+    window.webpayCheckout(checkoutPayload);
   }, [amount, refreshTransactionStatus, taxYear, user?.email]);
 
   const handlePay = async () => {
@@ -283,7 +289,9 @@ export default function PaymentPage() {
             )}
 
             <Button
-              onClick={refreshTransactionStatus}
+              onClick={() => {
+                void refreshTransactionStatus();
+              }}
               disabled={isLoading || !txRef}
               className="w-full py-8 rounded-2xl bg-brand-dark text-white font-bold uppercase tracking-widest hover:bg-brand-gold hover:text-brand-dark transition-all shadow-md"
             >
