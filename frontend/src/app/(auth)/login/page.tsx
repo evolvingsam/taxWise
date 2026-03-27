@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { AuthSidebar } from "@/components/auth/AuthSidebar";
 import { useAuth } from "@/lib/AuthContext";
 import toast from "react-hot-toast";
@@ -11,20 +11,31 @@ import toast from "react-hot-toast";
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth() as any;
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
+    
     setLoading(true);
     try {
-      await login(email, password);
+      const user = await login(email, password);
+      if (!user) {
+        throw new Error("Login failed: no user returned");
+      }
       toast.success("Successfully logged in!");
       router.push("/dashboard");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to log in");
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to log in";
+      console.error("Login error:", errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -64,15 +75,24 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-bold text-brand-dark uppercase tracking-wider">Password</label>
                 <Link href="#" className="text-sm font-bold text-brand-gold hover:text-brand-dark transition-colors">Forgot password?</Link>
               </div>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all"
-                required
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              </div>
             </div>
 
             <div className="pt-2 animate-fade-in-up [animation-delay:500ms] opacity-0">

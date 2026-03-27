@@ -1,22 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { User, Shield, Bell, Key, Save, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/AuthContext";
+import toast from "react-hot-toast";
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("profile");
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [isRefreshingSession, setIsRefreshingSession] = useState(false);
+  const { user, updateProfile, refreshSession } = useAuth();
 
-  const handleSave = (e: React.FormEvent) => {
+  const [firstName, setFirstName] = useState(user?.first_name || "");
+  const [lastName, setLastName] = useState(user?.last_name || "");
+  const [userType, setUserType] = useState(user?.user_type || "individual");
+
+  useEffect(() => {
+    if (!user) return;
+    setFirstName(user.first_name || "");
+    setLastName(user.last_name || "");
+    setUserType(user.user_type || "individual");
+  }, [user]);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    setTimeout(() => {
+
+    try {
+      await updateProfile({
+        first_name: firstName,
+        last_name: lastName,
+        user_type: userType,
+      });
       setIsSaving(false);
       setSaved(true);
+      toast.success("Profile updated successfully");
       setTimeout(() => setSaved(false), 3000);
-    }, 1000);
+    } catch (err: unknown) {
+      setIsSaving(false);
+      toast.error(err instanceof Error ? err.message : "Failed to update profile");
+    }
+  };
+
+  const handleSessionRefresh = async () => {
+    setIsRefreshingSession(true);
+    try {
+      await refreshSession();
+      toast.success("Session token refreshed");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to refresh session token");
+    } finally {
+      setIsRefreshingSession(false);
+    }
   };
 
   return (
@@ -64,24 +101,23 @@ export default function SettingsPage() {
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">Full Name</label>
-                  <input type="text" defaultValue="Adeola Chinedu" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all" />
+                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">First Name</label>
+                  <input value={firstName} onChange={(e) => setFirstName(e.target.value)} type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">Last Name</label>
+                  <input value={lastName} onChange={(e) => setLastName(e.target.value)} type="text" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">Email Address</label>
-                  <input type="email" defaultValue="adeola@example.com" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all" />
+                  <input type="email" value={user?.email || ""} disabled className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-100 text-gray-500 cursor-not-allowed" />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">Phone Number</label>
-                  <input type="tel" defaultValue="+234 800 123 4567" className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">State of Residence</label>
-                  <select className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all appearance-none cursor-pointer">
-                    <option>Lagos State</option>
-                    <option>Abuja FCT</option>
-                    <option>Rivers State</option>
-                    <option>Oyo State</option>
+                  <label className="text-xs font-bold uppercase tracking-widest text-brand-dark">User Type</label>
+                  <select value={userType} onChange={(e) => setUserType(e.target.value)} className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50 focus:border-brand-gold transition-all appearance-none cursor-pointer">
+                    <option value="individual">Individual</option>
+                    <option value="sme">SME</option>
+                    <option value="corporate">Corporate</option>
                   </select>
                 </div>
               </div>
@@ -189,6 +225,9 @@ export default function SettingsPage() {
               <div className="pt-6 border-t border-gray-100 flex justify-start gap-4">
                 <Button type="submit" disabled={isSaving} className="rounded-xl bg-brand-dark text-white hover:bg-brand-gold hover:text-brand-dark shadow-md px-8 disabled:opacity-50">
                   {isSaving ? "Updating..." : "Update Password"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleSessionRefresh} disabled={isRefreshingSession} className="rounded-xl border-gray-200">
+                  {isRefreshingSession ? "Refreshing Session..." : "Refresh Access Token"}
                 </Button>
                 {saved && <span className="flex items-center text-emerald-600 text-sm font-bold ml-auto animate-fade-in"><CheckCircle2 className="w-4 h-4 mr-2" /> Password Secured</span>}
               </div>
